@@ -1,0 +1,37 @@
+[workspace]
+members = [
+    "servers/fs",
+    "servers/net", 
+    "servers/posix",
+    "servers/io",
+    "drivers/block",
+    "drivers/net",
+    "drivers/usb",
+    "drivers/gpu",
+    "lib/orion-driver",
+    "lib/orion-ipc",
+    "lib/orion-cap",
+    "tools/orion-top",
+    "tools/orion-trace",
+    "tools/orion-ps",
+]
+
+[workspace.dependencies]
+# Dépendances communes pour tous les crates
+serde = { version = "1.0", default-features = false }
+bitflags = "2.0"
+spin = "0.9"
+
+[profile.release]
+# Optimisations pour performance maximale
+opt-level = 3
+debug = false
+panic = "abort"
+codegen-units = 1
+lto = true
+
+[profile.dev]
+# Debug symbols pour développement
+opt-level = 0
+debug = true
+panic = "abort"

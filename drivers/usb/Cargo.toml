@@ -1,0 +1,33 @@
+[package]
+name = "orion-usb-drivers"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jérémy Noverraz <jeremy@orion-os.dev>"]
+description = "USB device drivers for Orion OS"
+license = "MIT"
+keywords = ["orion", "driver", "usb", "hid", "storage"]
+categories = ["no-std", "embedded", "os"]
+
+[dependencies]
+orion-driver = { path = "../../lib/orion-driver" }
+bitflags = "2.0"
+
+[[bin]]
+name = "usb-hid"
+path = "src/usb_hid.rs"
+
+[[bin]]
+name = "usb-storage"
+path = "src/usb_storage.rs"
+
+[[bin]]
+name = "usb-hub"
+path = "src/usb_hub.rs"
+
+[[bin]]
+name = "usb-keyboard"
+path = "src/usb_keyboard.rs"
+
+[[bin]]
+name = "usb-mouse"
+path = "src/usb_mouse.rs"

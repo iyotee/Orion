@@ -1,0 +1,33 @@
+[package]
+name = "orion-network-drivers"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jérémy Noverraz <jeremy@orion-os.dev>"]
+description = "Network device drivers for Orion OS"
+license = "MIT"
+keywords = ["orion", "driver", "network", "ethernet", "virtio"]
+categories = ["no-std", "embedded", "os"]
+
+[dependencies]
+orion-driver = { path = "../../lib/orion-driver" }
+bitflags = "2.0"
+
+[[bin]]
+name = "virtio-net"
+path = "src/virtio_net.rs"
+
+[[bin]]
+name = "e1000"
+path = "src/e1000.rs"
+
+[[bin]]
+name = "rtl8139"
+path = "src/rtl8139.rs"
+
+[[bin]]
+name = "e1000e"
+path = "src/e1000e.rs"
+
+[[bin]]
+name = "r8169"
+path = "src/r8169.rs"

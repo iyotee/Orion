@@ -1,0 +1,138 @@
+name: Orion CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run nightly at 02:00 UTC
+    - cron: '0 2 * * *'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Job principal de build et test
+  build-and-test:
+    uses: ./.github/workflows/build-test.yml
+
+  # Fuzzing (uniquement nightly et sur main)
+  fuzz:
+    name: Fuzzing
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install AFL++
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y afl++
+    
+    - name: Setup Fuzzing Environment
+      run: |
+        # TODO: Configurer environment fuzzing
+        echo "Fuzzing setup needed"
+    
+    - name: Run Fuzz Campaign (Short)
+      timeout-minutes: 30
+      run: |
+        # TODO: Lancer fuzzing court pour CI
+        echo "Short fuzz campaign would run here"
+    
+    - name: Collect Fuzz Results
+      if: always()
+      run: |
+        # TODO: Collecter résultats fuzzing
+        echo "Fuzz results collection needed"
+
+  # Benchmarks de performance
+  benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build Benchmark Suite
+      run: |
+        # TODO: Build des benchmarks
+        echo "Benchmark build needed"
+    
+    - name: Run KPI Benchmarks
+      run: |
+        # TODO: Exécuter benchmarks KPI vs Linux
+        echo "KPI benchmarks would run here"
+        echo "Target: syscall latency < 150ns"
+        echo "Target: context switch < 250ns"
+        echo "Target: IPC throughput > 8M msg/s"
+    
+    - name: Upload Benchmark Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: bench/results/
+
+  # Build de release
+  release-build:
+    name: Release Build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang \
+          lld \
+          cmake \
+          ninja-build \
+          xorriso \
+          grub-pc-bin \
+          grub-efi-amd64-bin
+    
+    - name: Build Release Kernel
+      run: |
+        cmake -B build-release \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DORION_ARCH=x86_64 \
+          -GNinja
+        cmake --build build-release --target kernel
+    
+    - name: Build ISO Image
+      run: |
+        # TODO: Script de création ISO UEFI
+        echo "ISO creation needed"
+        # ./scripts/build-iso.sh build-release/orion-kernel.elf orion-v${{ github.ref_name }}.iso
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          build-release/orion-kernel.elf
+          orion-*.iso
+        body: |
+          # Orion ${{ github.ref_name }}
+          
+          ## Features
+          - Micro-kernel hybrid architecture
+          - Capability-based security
+          - Rust drivers in userland
+          - UEFI boot support
+          
+          ## KPIs
+          - [ ] Syscall latency < 150ns
+          - [ ] Context switch < 250ns  
+          - [ ] IPC throughput > 8M msg/s
+          - [ ] FS throughput ≥ 85% ext4
+          
+          ## Files
+          - `orion-kernel.elf`: Kernel ELF binary
+          - `orion-*.iso`: Bootable UEFI ISO image

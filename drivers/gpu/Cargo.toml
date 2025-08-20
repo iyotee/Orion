@@ -1,0 +1,33 @@
+[package]
+name = "orion-gpu-drivers"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jérémy Noverraz <jeremy@orion-os.dev>"]
+description = "Graphics and display drivers for Orion OS"
+license = "MIT"
+keywords = ["orion", "driver", "gpu", "graphics", "display"]
+categories = ["no-std", "embedded", "os"]
+
+[dependencies]
+orion-driver = { path = "../../lib/orion-driver" }
+bitflags = "2.0"
+
+[[bin]]
+name = "framebuffer"
+path = "src/framebuffer.rs"
+
+[[bin]]
+name = "virtio-gpu"
+path = "src/virtio_gpu.rs"
+
+[[bin]]
+name = "vga"
+path = "src/vga.rs"
+
+[[bin]]
+name = "intel-graphics"
+path = "src/intel_graphics.rs"
+
+[[bin]]
+name = "amd-graphics"
+path = "src/amd_graphics.rs"

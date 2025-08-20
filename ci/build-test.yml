@@ -1,0 +1,229 @@
+name: Build and Test Orion
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-kernel:
+    name: Build Kernel
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+        build_type: [Debug, Release]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang \
+          lld \
+          cmake \
+          ninja-build \
+          qemu-system-x86 \
+          qemu-system-aarch64
+    
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        components: rust-src
+        targets: |
+          x86_64-unknown-none
+          aarch64-unknown-none
+        override: true
+    
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DORION_ARCH=${{ matrix.arch }} \
+          -GNinja
+    
+    - name: Build Kernel
+      run: cmake --build build --target kernel
+    
+    - name: Build Userland Components
+      run: |
+        cd drivers && cargo build --release
+        cd ../servers && cargo build --release
+        cd ../tools && cargo build --release
+    
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: orion-kernel-${{ matrix.arch }}-${{ matrix.build_type }}
+        path: |
+          build/orion-kernel.elf
+          target/release/
+    
+  test-qemu:
+    name: Test in QEMU
+    needs: build-kernel
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: orion-kernel-x86_64-Debug
+        path: build/
+    
+    - name: Install QEMU
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qemu-system-x86
+    
+    - name: Test Boot in QEMU
+      timeout-minutes: 5
+      run: |
+        qemu-system-x86_64 \
+          -machine q35 \
+          -cpu qemu64 \
+          -smp 2 \
+          -m 512M \
+          -serial file:boot.log \
+          -no-reboot \
+          -no-shutdown \
+          -kernel build/orion-kernel.elf \
+          -nographic &
+        
+        QEMU_PID=$!
+        sleep 10
+        kill $QEMU_PID || true
+        
+        # Vérifier que le noyau a booté
+        if grep -q "ORION KERNEL" boot.log; then
+          echo "✓ Kernel boot successful"
+        else
+          echo "✗ Kernel boot failed"
+          cat boot.log
+          exit 1
+        fi
+        
+        if grep -q "Kernel ready" boot.log; then
+          echo "✓ Kernel initialization complete"
+        else
+          echo "✗ Kernel initialization failed"
+          cat boot.log
+          exit 1
+        fi
+    
+    - name: Upload Boot Log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: qemu-boot-log
+        path: boot.log
+
+  test-coverage:
+    name: Code Coverage
+    needs: build-kernel
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang \
+          llvm \
+          cmake \
+          ninja-build
+    
+    - name: Build with Coverage
+      run: |
+        cmake -B build-coverage \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DORION_ARCH=x86_64 \
+          -DCMAKE_C_FLAGS="--coverage" \
+          -GNinja
+        cmake --build build-coverage --target kernel
+    
+    - name: Generate Coverage Report
+      run: |
+        # TODO: Implémenter collecte de couverture avec kcov
+        echo "Coverage collection not implemented yet"
+    
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Clang Tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-tidy clang-format
+    
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        components: clippy, rustfmt
+    
+    - name: Check C Code Format
+      run: |
+        find kernel -name "*.c" -o -name "*.h" | \
+        xargs clang-format --dry-run --Werror
+    
+    - name: Run Clang-Tidy
+      run: |
+        # TODO: Configuration clang-tidy pour noyau
+        echo "Clang-tidy configuration needed"
+    
+    - name: Check Rust Format
+      run: |
+        cd drivers && cargo fmt -- --check
+        cd ../servers && cargo fmt -- --check
+        cd ../tools && cargo fmt -- --check
+    
+    - name: Run Clippy
+      run: |
+        cd drivers && cargo clippy -- -D warnings
+        cd ../servers && cargo clippy -- -D warnings
+        cd ../tools && cargo clippy -- -D warnings
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    
+    - name: Install cargo-audit
+      run: cargo install cargo-audit
+    
+    - name: Audit Rust Dependencies
+      run: |
+        cd drivers && cargo audit
+        cd ../servers && cargo audit
+        cd ../tools && cargo audit
+    
+    - name: Check for Unsafe Code
+      run: |
+        # Compter les blocs unsafe
+        UNSAFE_COUNT=$(find . -name "*.rs" -exec grep -l "unsafe" {} \; | wc -l)
+        echo "Found $UNSAFE_COUNT files with unsafe code"
+        
+        # TODO: Implémenter vérification des justifications unsafe
+        if [ $UNSAFE_COUNT -gt 10 ]; then
+          echo "⚠️  Too many unsafe blocks, review needed"
+        fi

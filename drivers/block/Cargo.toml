@@ -1,0 +1,25 @@
+[package]
+name = "orion-block-drivers"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jérémy Noverraz <jeremy@orion-os.dev>"]
+description = "Block storage device drivers for Orion OS"
+license = "MIT"
+keywords = ["orion", "driver", "block", "storage", "virtio"]
+categories = ["no-std", "embedded", "os"]
+
+[dependencies]
+orion-driver = { path = "../../lib/orion-driver" }
+bitflags = "2.0"
+
+[[bin]]
+name = "virtio-blk"
+path = "src/virtio_blk.rs"
+
+[[bin]]
+name = "nvme"
+path = "src/nvme.rs"
+
+[[bin]]
+name = "ahci"
+path = "src/ahci.rs"
