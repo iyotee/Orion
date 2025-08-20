@@ -85,13 +85,13 @@ git clone https://github.com/your-org/orion-os.git
 cd orion-os
 
 # Build everything
-./orion-build.sh all
+./tools/orion-build.sh all
 
 # Or build components separately
-./orion-build.sh bootloader    # Build UEFI bootloader
-./orion-build.sh kernel        # Build kernel
-./orion-build.sh drivers       # Build Rust drivers
-./orion-build.sh iso           # Generate bootable ISO
+./tools/orion-build.sh bootloader    # Build UEFI bootloader
+./tools/orion-build.sh kernel        # Build kernel
+./tools/orion-build.sh drivers       # Build Rust drivers
+./tools/orion-build.sh iso           # Generate bootable ISO
 ```
 
 ### Testing in QEMU
@@ -109,23 +109,11 @@ qemu-system-x86_64 -M q35 -m 4G -smp 4 \
 
 ## 📚 Documentation
 
-### 📖 User Guides
-- [Installation Guide](docs/installation.md)
-- [User Manual](docs/user-manual.md)
-- [Shell Commands](docs/shell-commands.md)
-
-### 🔧 Developer Documentation
-- [Architecture Overview](docs/architecture.md)
-- [Kernel Development](docs/kernel-development.md)
-- [Driver Development](docs/driver-development.md)
-- [API Reference](docs/api-reference.md)
-- [Security Model](docs/security.md)
-- [Memory Management](docs/memory-management.md)
-
-### 🏛️ Design Documents
-- [ADR-000: Architecture Decision Records](docs/adr/adr-000-architecture.md)
-- [ADR-001: Security Framework](docs/adr/adr-001-security.md)
-- [ADR-002: Driver Framework](docs/adr/adr-002-drivers.md)
+### 📖 Essential Documentation
+- **[Architecture Guide](docs/ARCHITECTURE.md)** - System design and hybrid micro-kernel architecture
+- **[Installation Guide](docs/INSTALLATION.md)** - Complete build and setup instructions
+- **[Development Guide](docs/DEVELOPMENT.md)** - Contributing guidelines and coding standards
+- **[API Reference](docs/API.md)** - Complete system calls and kernel API documentation
 
 ## 🔧 Development
 
@@ -134,7 +122,7 @@ qemu-system-x86_64 -M q35 -m 4G -smp 4 \
 Orion uses a unified Bash-based build system:
 
 ```bash
-./orion-build.sh help
+./tools/orion-build.sh help
 
 Commands:
   clean      Clean all build artifacts
@@ -152,12 +140,12 @@ Commands:
 
 ```bash
 # Run all tests
-python3 test.py --all
+python3 tools/test.py --all
 
 # Run specific test categories
-python3 test.py --suite build      # Build system tests
-python3 test.py --suite kernel     # Kernel tests
-python3 test.py --suite qemu       # QEMU boot tests
+python3 tools/test.py --suite build      # Build system tests
+python3 tools/test.py --suite kernel     # Kernel tests
+python3 tools/test.py --suite qemu       # QEMU boot tests
 ```
 
 ### 📊 Performance Metrics
