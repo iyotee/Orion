@@ -23,7 +23,7 @@ static syscall_handler_t syscall_table[MAX_SYSCALLS] = {
     [SYS_WAIT]          = (syscall_handler_t)sys_wait_impl,
     [SYS_SIGNAL]        = (syscall_handler_t)sys_signal_impl,
     [SYS_GETPID]        = (syscall_handler_t)sys_getpid_impl,
-    [SYS_GETTID]        = (syscall_handler_t)sys_gettid_impl
+    [SYS_GETTID]        = (syscall_handler_t)sys_gettid_impl,
     
     // Mémoire
     [SYS_VM_MAP]        = (syscall_handler_t)sys_vm_map_impl,
@@ -32,7 +32,7 @@ static syscall_handler_t syscall_table[MAX_SYSCALLS] = {
     [SYS_SHM_CREATE]    = (syscall_handler_t)sys_shm_create_impl,
     [SYS_SHM_ATTACH]    = (syscall_handler_t)sys_shm_attach_impl,
     [SYS_SHM_DETACH]    = (syscall_handler_t)sys_shm_detach_impl,
-    [SYS_MADVISE]       = (syscall_handler_t)sys_madvise_impl
+    [SYS_MADVISE]       = (syscall_handler_t)sys_madvise_impl,
     
     // IPC
     [SYS_PORT_CREATE]   = (syscall_handler_t)sys_port_create_impl,
@@ -97,7 +97,8 @@ int64_t syscall_handler(uint64_t syscall_num, uint64_t arg1, uint64_t arg2,
 // Implémentations des syscalls
 
 // sys_info - obtenir infos système
-int64_t sys_info_impl(or_system_info_t* info) {
+int64_t sys_info_impl(or_system_info_t* info)
+{
     if (!info) {
         return -OR_EINVAL;
     }
@@ -395,7 +396,7 @@ int64_t sys_wait_impl(uint64_t pid, int* status, uint64_t options) {
     // Attendre que le processus devienne zombie
     while (target->state != PROC_STATE_ZOMBIE) {
         scheduler_block_current_process();
-        scheduler_yield();
+        sched_yield();
     }
     
     // Récupérer le code de sortie

@@ -15,6 +15,7 @@
 #include <orion/types.h>
 #include <orion/mm.h>
 #include <orion/security.h>
+#include <orion/syscalls.h>
 
 // ========================================
 // VFS CONSTANTS AND CONFIGURATION
@@ -171,7 +172,7 @@ struct vfs_inode {
     uint64_t i_mtime;                   // Last modification time
     uint64_t i_ctime;                   // Last status change time
     uint64_t i_version;                 // Version number
-    atomic32_t i_count;                 // Reference count
+    atomic64_t i_count;                 // Reference count
     spinlock_t i_lock;                  // Inode lock
     
     // File system specific data
@@ -199,7 +200,7 @@ struct vfs_file {
     uint64_t f_pos;                     // Current file position
     uint32_t f_flags;                   // File flags (O_RDONLY, etc.)
     uint32_t f_mode;                    // File mode
-    atomic32_t f_count;                 // Reference count
+    atomic64_t f_count;                 // Reference count
     spinlock_t f_lock;                  // File lock
     void* f_private;                    // File system private data
     

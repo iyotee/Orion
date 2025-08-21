@@ -22,7 +22,6 @@
 // ========================================
 
 typedef struct vm_space vm_space_t;
-typedef struct handle handle_t;
 
 // ========================================
 // ENUMS AND CONSTANTS
@@ -34,6 +33,9 @@ typedef enum
     PROC_STATE_READY,
     PROC_STATE_RUNNING,
     PROC_STATE_BLOCKED,
+    PROC_STATE_WAITING,
+    PROC_STATE_SLEEPING,
+    PROC_STATE_STOPPED,
     PROC_STATE_ZOMBIE,
     PROC_STATE_TERMINATED
 } process_state_t;

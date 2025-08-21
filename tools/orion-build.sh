@@ -147,26 +147,34 @@ build_iso() {
     dd if=/dev/zero of="$efi_img" bs=1M count=50 2>/dev/null
     mkfs.fat -F 32 "$efi_img" >/dev/null 2>&1
     
-    # Copy bootloader and kernel using mtools
-    mcopy -i "$efi_img" "bootloader/build/bootx64.efi" ::EFI/BOOT/bootx64.efi
-    mcopy -i "$efi_img" "build/kernel/orion-kernel.elf" ::boot/orion-kernel.elf
+    # Mount the FAT image and copy files (professional approach)
+    sudo mkdir -p /mnt/orion-efi
+    sudo mount "$efi_img" /mnt/orion-efi
+    
+    # Copy bootloader and kernel with proper structure
+    sudo mkdir -p /mnt/orion-efi/EFI/BOOT
+    sudo mkdir -p /mnt/orion-efi/boot
+    sudo cp "bootloader/build/bootx64.efi" "/mnt/orion-efi/EFI/BOOT/bootx64.efi"
+    sudo cp "build/kernel/orion-kernel.elf" "/mnt/orion-efi/boot/orion-kernel.elf"
+    
+    # Create professional boot configuration
+    sudo sh -c 'echo "EFI\\BOOT\\bootx64.efi" > /mnt/orion-efi/startup.nsh'
+    
+    # Unmount cleanly
+    sudo umount /mnt/orion-efi
+    sudo rmdir /mnt/orion-efi
     
     # Create auto-boot script
     echo "EFI\\BOOT\\bootx64.efi" > "$temp_dir/startup.nsh"
     
-    # Generate final ISO
+    # Generate final ISO with professional settings
     print_status "Creating bootable ISO..."
-    xorriso -as mkisofs \
-        -o "$iso_output" \
+    genisoimage -o "$iso_output" \
         -r -J -joliet-long \
         -b "$efi_img" \
         -no-emul-boot \
         -boot-load-size 4 \
         -boot-info-table \
-        -eltorito-alt-boot \
-        -e "$efi_img" \
-        -no-emul-boot \
-        -isohybrid-gpt-basdat \
         "$temp_dir" >/dev/null 2>&1
     
     # Cleanup

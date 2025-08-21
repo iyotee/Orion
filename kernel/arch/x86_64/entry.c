@@ -1,7 +1,7 @@
 // Point d'entrée C principal pour Orion x86_64
 #include <orion/kernel.h>
 #include <orion/types.h>
-#include <arch.h>
+#include "include/arch.h"
 
 // Variables externes du linker
 extern uint64_t _text_start, _text_end;
@@ -146,34 +146,7 @@ void detect_cpu(cpu_info_t* cpu) {
     cpu->model[0] = '\0';
 }
 
-// Initialisation précoce du noyau
-void kernel_early_init(void) {
-    // 1. Initialiser console série
-    console_init();
-    
-    kprintf("\n");
-    kprintf("=== ORION KERNEL v%s ===\n", ORION_VERSION_STR);
-    kprintf("Early initialization...\n");
-    
-    // 2. Vérifier layout mémoire
-    kprintf("Kernel layout:\n");
-    kprintf("  .text:   0x%p - 0x%p\n", &_text_start, &_text_end);
-    kprintf("  .rodata: 0x%p - 0x%p\n", &_rodata_start, &_rodata_end);
-    kprintf("  .data:   0x%p - 0x%p\n", &_data_start, &_data_end);
-    kprintf("  .bss:    0x%p - 0x%p\n", &_bss_start, &_bss_end);
-    kprintf("  End:     0x%p\n", &_kernel_end);
-    
-    // 3. Détecter CPU
-    detect_cpu(&g_system_info.cpus[0]);
-    g_system_info.cpu_count = 1;
-    
-    kprintf("CPU: %s\n", g_system_info.cpus[0].vendor);
-    
-    // 4. Initialiser architecture
-    arch_early_init();
-    
-    kprintf("Early init complete.\n");
-}
+// kernel_early_init is implemented in main.c
 
 // Initialisation tardive du noyau  
 void kernel_late_init(void) {
@@ -188,50 +161,4 @@ void kernel_late_init(void) {
     kprintf("Kernel initialization complete!\n");
 }
 
-// Point d'entrée principal C
-void kernel_main(void) {
-    // Initialisation précoce
-    kernel_early_init();
-    
-    // Afficher bannière Orion
-    kprintf("\n");
-    kprintf("    ██████╗ ██████╗ ██╗ ██████╗ ███╗   ██╗\n");
-    kprintf("   ██╔═══██╗██╔══██╗██║██╔═══██╗████╗  ██║\n");
-    kprintf("   ██║   ██║██████╔╝██║██║   ██║██╔██╗ ██║\n");
-    kprintf("   ██║   ██║██╔══██╗██║██║   ██║██║╚██╗██║\n");
-    kprintf("   ╚██████╔╝██║  ██║██║╚██████╔╝██║ ╚████║\n");
-    kprintf("    ╚═════╝ ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝\n");
-    kprintf("\n");
-    kprintf("   Modern Kernel - Performance & Security\n");
-    kprintf("   Version %s\n", ORION_VERSION_STR);
-    kprintf("\n");
-    
-    // Afficher infos système
-    kprintf("System Information:\n");
-    kprintf("  CPU Count: %d\n", g_system_info.cpu_count);
-    kprintf("  Primary CPU: %s\n", g_system_info.cpus[0].vendor);
-    
-    if (boot_efi_handle) {
-        kprintf("  Boot: UEFI (Handle: 0x%p)\n", (void*)boot_efi_handle);
-    }
-    
-    // Initialisation tardive
-    kernel_late_init();
-    
-    // Boucle principale du noyau
-    kprintf("\nKernel ready. Entering main loop...\n");
-    
-    uint64_t iterations = 0;
-    while (1) {
-        iterations++;
-        
-        // Afficher heartbeat toutes les ~1M iterations
-        if ((iterations % 1000000) == 0) {
-            kprintf("Kernel heartbeat: %lld iterations\n", 
-                   (long long)iterations);
-        }
-        
-        // Yield CPU (pour l'instant, juste HLT)
-        hlt();
-    }
-}
+// kernel_main is implemented in main.c

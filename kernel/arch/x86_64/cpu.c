@@ -103,7 +103,7 @@ static void enable_security_features(void) {
 
 // Configurer EFER pour les features de sécurité
 static void enable_efer_features(void) {
-    uint64_t efer = rdmsr(MSR_EFER);
+    uint64_t efer = msr_read(MSR_EFER);
     bool changed = false;
     
     // S'assurer que NX est activé
@@ -114,7 +114,7 @@ static void enable_efer_features(void) {
     }
     
     if (changed) {
-        wrmsr(MSR_EFER, efer);
+        msr_write(MSR_EFER, efer);
     }
 }
 
@@ -168,10 +168,7 @@ uint64_t arch_get_rdtsc(void) {
     return ((uint64_t)high << 32) | low;
 }
 
-// Get current timestamp (using TSC for now)
-uint64_t arch_get_timestamp(void) {
-    return arch_get_rdtsc();
-}
+
 
 // Enable SMEP (Supervisor Mode Execution Prevention)
 void arch_enable_smep(void) {
@@ -312,19 +309,19 @@ void arch_setup_syscall_interface(void) {
     // Configure SYSCALL/SYSRET MSRs
     // STAR: CS selectors for kernel/user
     uint64_t star = ((uint64_t)0x08 << 32) | ((uint64_t)0x18 << 48);
-    wrmsr(MSR_STAR, star);
+    msr_write(MSR_STAR, star);
     
     // LSTAR: Syscall entry point
-    wrmsr(MSR_LSTAR, (uint64_t)syscall_entry);
+    msr_write(MSR_LSTAR, (uint64_t)syscall_entry);
     
     // SFMASK: RFLAGS mask
-    wrmsr(MSR_SFMASK, 0x200); // Clear IF (interrupts)
+    msr_write(MSR_SFMASK, 0x200); // Clear IF (interrupts)
     
     kinfo("x86_64 syscall interface configured");
 }
 
 // Context switch (save/restore processor state)
-void arch_context_switch(void* from_stack, void* to_stack) {
+void arch_context_switch(thread_t *prev, thread_t *next) {
     // Save current context
     __asm__ volatile (
         "pushfq\n\t"
@@ -361,8 +358,8 @@ void arch_context_switch(void* from_stack, void* to_stack) {
         "popq %%rbx\n\t"
         "popq %%rax\n\t"
         "popfq"
-        : "=m" (*(uint64_t*)from_stack)
-        : "m" (*(uint64_t*)to_stack)
+        : "=m" (prev->rsp)
+        : "m" (next->rsp)
         : "memory"
     );
 }
@@ -549,33 +546,4 @@ void arch_write_debug_register(uint32_t reg, uint64_t value) {
     }
 }
 
-// Control register access
-uint64_t read_cr3(void) {
-    uint64_t cr3;
-    __asm__ volatile ("mov %%cr3, %0" : "=r" (cr3));
-    return cr3;
-}
 
-void write_cr3(uint64_t cr3) {
-    __asm__ volatile ("mov %0, %%cr3" :: "r" (cr3) : "memory");
-}
-
-uint64_t read_cr0(void) {
-    uint64_t cr0;
-    __asm__ volatile ("mov %%cr0, %0" : "=r" (cr0));
-    return cr0;
-}
-
-void write_cr0(uint64_t cr0) {
-    __asm__ volatile ("mov %0, %%cr0" :: "r" (cr0) : "memory");
-}
-
-uint64_t read_cr4(void) {
-    uint64_t cr4;
-    __asm__ volatile ("mov %%cr4, %0" : "=r" (cr4));
-    return cr4;
-}
-
-void write_cr4(uint64_t cr4) {
-    __asm__ volatile ("mov %0, %%cr4" :: "r" (cr4) : "memory");
-}

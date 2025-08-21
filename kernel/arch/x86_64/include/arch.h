@@ -91,16 +91,17 @@ void arch_halt(void);
 void arch_pause(void);
 void syscall_entry(void); // Assembly syscall entry point
 
-// Control register access
-uint64_t read_cr3(void);
-void write_cr3(uint64_t cr3);
-uint64_t read_cr0(void);
-void write_cr0(uint64_t cr0);
-uint64_t read_cr4(void);
-void write_cr4(uint64_t cr4);
+// Control register access - implemented as static inline in cpu.c
 
-// Virtual address conversion (defined in mm.h but used here)
-#define PHYS_TO_VIRT(paddr) ((void *)((paddr) + 0xFFFF800000000000ULL))
+// Additional architecture functions
+uint64_t arch_get_rdtsc(void);
+void arch_enable_smep(void);
+void arch_enable_smap(void);
+void arch_enable_umip(void);
+bool arch_validate_user_address(uint64_t vaddr, size_t size, bool write);
+
+// Virtual address conversion (defined in types.h but used here)
+// PHYS_TO_VIRT défini dans types.h
 #define VIRT_TO_PHYS(vaddr) ((uint64_t)(vaddr) - 0xFFFF800000000000ULL)
 
 // Fonctions assembleur avec stubs MSVC
@@ -142,30 +143,15 @@ static inline void cpuid(uint32_t leaf, uint32_t *eax, uint32_t *ebx, uint32_t *
 {
     __asm__ volatile("cpuid" : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx) : "a"(leaf));
 }
-static inline uint64_t read_cr4(void)
-{
-    uint64_t val;
-    __asm__ volatile("mov %%cr4, %0" : "=r"(val));
-    return val;
-}
-static inline void write_cr4(uint64_t val)
-{
-    __asm__ volatile("mov %0, %%cr4" ::"r"(val));
-}
-static inline void write_cr3(uint64_t val)
-{
-    __asm__ volatile("mov %0, %%cr3" ::"r"(val));
-}
-static inline uint64_t rdmsr(uint32_t msr)
-{
-    uint32_t low, high;
-    __asm__ volatile("rdmsr" : "=a"(low), "=d"(high) : "c"(msr));
-    return ((uint64_t)high << 32) | low;
-}
-static inline void wrmsr(uint32_t msr, uint64_t val)
-{
-    __asm__ volatile("wrmsr" ::"a"((uint32_t)val), "d"((uint32_t)(val >> 32)), "c"(msr));
-}
+// These functions are now defined in arch_asm.S as external functions
+extern uint64_t read_cr0(void);
+extern void write_cr0(uint64_t val);
+extern uint64_t read_cr3(void);
+extern void write_cr3(uint64_t val);
+extern uint64_t read_cr4(void);
+extern void write_cr4(uint64_t val);
+extern uint64_t msr_read(uint32_t msr);            // Note: renamed from rdmsr
+extern void msr_write(uint32_t msr, uint64_t val); // Note: renamed from wrmsr
 static inline uint8_t __builtin_inb(uint16_t port)
 {
     uint8_t data;

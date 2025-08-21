@@ -59,6 +59,7 @@ typedef enum
     OR_EINTR,     // Interrompu
     OR_EBUSY,     // Ressource occupée
     OR_EFAULT,    // Adresse invalide
+    OR_ESRCH,     // Process not found
 } or_error_t;
 
 // Attributs compilateur - compatible MSVC/GCC/Clang
@@ -113,6 +114,59 @@ typedef enum
 NORETURN void panic(const char *fmt, ...);
 
 // ====================================
+// BOOT PROTOCOL STRUCTURES
+// ====================================
+
+// Boot information structure (forward declaration)
+struct orion_boot_info;
+
+// System information structure
+typedef struct
+{
+    char kernel_version[32];
+    uint64_t boot_time;
+    uint64_t current_time;
+    uint64_t total_memory;
+    uint64_t free_memory;
+    uint32_t cpu_count;
+    uint32_t process_count;
+    uint32_t thread_count;
+} or_system_info_t;
+
+// Virtual memory mapping structure
+typedef struct
+{
+    uint64_t addr;    // Adresse virtuelle (0 = auto)
+    size_t length;    // Taille
+    uint32_t prot;    // Protection (READ|WRITE|EXEC)
+    uint32_t flags;   // Flags (PRIVATE|SHARED|FIXED)
+    or_cap_t backing; // Capability de l'objet backing (0 = anonymous)
+    uint64_t offset;  // Offset dans l'objet backing
+} or_vm_map_t;
+
+// IPC message structures
+typedef struct
+{
+    or_cap_t target_port; // Port de destination
+    const void *data;     // Données à envoyer
+    size_t data_size;     // Taille des données
+    or_cap_t *caps;       // Capabilities à transférer
+    size_t caps_count;    // Nombre de capabilities
+    uint64_t timeout_ns;  // Timeout en nanosecondes
+} or_msg_send_t;
+
+typedef struct
+{
+    or_cap_t source_port; // Port source (output)
+    void *buffer;         // Buffer pour recevoir
+    size_t buffer_size;   // Taille du buffer
+    or_cap_t *caps;       // Buffer pour capabilities reçues
+    size_t caps_max;      // Nombre max de capabilities
+    size_t caps_received; // Nombre de capabilities reçues (output)
+    uint64_t timeout_ns;  // Timeout
+} or_msg_recv_t;
+
+// ====================================
 // MISSING STANDARD TYPES
 // ====================================
 
@@ -139,14 +193,9 @@ struct sigevent
         int sival_int;   // Integer value
         void *sival_ptr; // Pointer value
     } sigev_value;
-    void (*sigev_notify_function)(union sigval);
-    void *sigev_notify_attributes;
-};
 
-union sigval
-{
-    int sival_int;   // Integer value
-    void *sival_ptr; // Pointer value
+    void (*sigev_notify_function)(void *); // Simplified for now
+    void *sigev_notify_attributes;
 };
 
 // ====================================
@@ -170,8 +219,8 @@ union sigval
 #define ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
 #define ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
 
-#define IS_ALIGNED(x, align) (((x) & ((align) - 1)) == 0)
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+// IS_ALIGNED déjà défini ligne 90
+// ARRAY_SIZE déjà défini ligne 85
 
 #define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
@@ -189,27 +238,83 @@ typedef struct
 
 #define SPINLOCK_INIT {.locked = 0, .cpu = 0, .padding = 0}
 
-// Spinlock functions
-void spinlock_init(spinlock_t *lock);
-void spin_lock(spinlock_t *lock);
-void spin_unlock(spinlock_t *lock);
-bool spin_trylock(spinlock_t *lock);
+// Forward declaration
+void arch_pause(void);
+
+// Spinlock functions (inline implementations)
+static inline void spinlock_init(spinlock_t *lock)
+{
+    if (lock)
+    {
+        lock->locked = 0;
+        lock->cpu = 0;
+    }
+}
+
+static inline void spin_lock(spinlock_t *lock)
+{
+    if (!lock)
+        return;
+
+    while (__atomic_test_and_set(&lock->locked, __ATOMIC_ACQUIRE))
+    {
+        arch_pause(); // CPU pause instruction for better performance
+    }
+}
+
+static inline void spin_unlock(spinlock_t *lock)
+{
+    if (!lock)
+        return;
+    __atomic_clear(&lock->locked, __ATOMIC_RELEASE);
+}
+
+static inline bool spin_trylock(spinlock_t *lock)
+{
+    if (!lock)
+        return false;
+
+    return !__atomic_test_and_set(&lock->locked, __ATOMIC_ACQUIRE);
+}
+
+// Aliases for compatibility
+#define spinlock_lock spin_lock
+#define spinlock_unlock spin_unlock
+
+// ====================================
+// CODES D'ERREUR ORION
+// ====================================
+#define OR_OK 0
+#define OR_EINVAL -1
+#define OR_ENOMEM -2
+#define OR_EPERM -3
+#define OR_ENOENT -4
+#define OR_EEXIST -5
+#define OR_EBUSY -6
+#define OR_ETIMEDOUT -7
+#define OR_EAGAIN -8
+#define OR_EFAULT -9
+#define OR_ENOSYS -10
+#define OR_EMFILE -11
+#define OR_EBADF -12
 
 // ====================================
 // ATOMIC TYPES AND OPERATIONS
 // ====================================
 
 // Atomic types for lock-free programming
-typedef struct {
+typedef struct
+{
     volatile uint64_t value;
 } atomic64_t;
 
-typedef struct {
+typedef struct
+{
     volatile uint32_t value;
 } atomic32_t;
 
 // Atomic initialization macros
-#define ATOMIC_VAR_INIT(val) { .value = (val) }
+#define ATOMIC_VAR_INIT(val) {.value = (val)}
 
 // Atomic memory ordering constants
 #define __ATOMIC_RELAXED 0
@@ -220,36 +325,80 @@ typedef struct {
 #define __ATOMIC_SEQ_CST 5
 
 // Atomic operations (simplified for kernel use)
-static inline uint64_t atomic_load_64(const atomic64_t *ptr) {
+static inline uint64_t atomic_load_64(const atomic64_t *ptr)
+{
     return ptr->value;
 }
 
-static inline void atomic_store_64(atomic64_t *ptr, uint64_t val) {
+static inline void atomic_store_64(atomic64_t *ptr, uint64_t val)
+{
     ptr->value = val;
 }
 
-static inline uint64_t atomic_fetch_add_64(atomic64_t *ptr, uint64_t val) {
+static inline uint64_t atomic_fetch_add_64(atomic64_t *ptr, uint64_t val)
+{
     return __atomic_fetch_add(&ptr->value, val, __ATOMIC_SEQ_CST);
 }
 
-static inline uint32_t atomic_load_32(const atomic32_t *ptr) {
+static inline uint32_t atomic_load_32(const atomic32_t *ptr)
+{
     return ptr->value;
 }
 
-static inline void atomic_store_32(atomic32_t *ptr, uint32_t val) {
+static inline void atomic_store_32(atomic32_t *ptr, uint32_t val)
+{
     ptr->value = val;
 }
 
-static inline uint32_t atomic_fetch_add_32(atomic32_t *ptr, uint32_t val) {
+static inline uint32_t atomic_fetch_add_32(atomic32_t *ptr, uint32_t val)
+{
     return __atomic_fetch_add(&ptr->value, val, __ATOMIC_SEQ_CST);
 }
 
-static inline bool atomic_compare_exchange_64(atomic64_t *ptr, uint64_t *expected, uint64_t desired) {
+static inline bool atomic_compare_exchange_64(atomic64_t *ptr, uint64_t *expected, uint64_t desired)
+{
     return __atomic_compare_exchange_n(&ptr->value, expected, desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 }
 
-static inline bool atomic_compare_exchange_32(atomic32_t *ptr, uint32_t *expected, uint32_t desired) {
+static inline bool atomic_compare_exchange_32(atomic32_t *ptr, uint32_t *expected, uint32_t desired)
+{
     return __atomic_compare_exchange_n(&ptr->value, expected, desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+}
+
+// Additional atomic operations
+static inline uint64_t atomic_load(const atomic64_t *ptr)
+{
+    return atomic_load_64(ptr);
+}
+
+static inline void atomic_store(atomic64_t *ptr, uint64_t val)
+{
+    atomic_store_64(ptr, val);
+}
+
+static inline uint64_t atomic_fetch_add(atomic64_t *ptr, uint64_t val)
+{
+    return atomic_fetch_add_64(ptr, val);
+}
+
+static inline uint64_t atomic_fetch_sub(atomic64_t *ptr, uint64_t val)
+{
+    return __atomic_fetch_sub(&ptr->value, val, __ATOMIC_SEQ_CST);
+}
+
+static inline uint64_t atomic_fetch_or(atomic64_t *ptr, uint64_t val)
+{
+    return __atomic_fetch_or(&ptr->value, val, __ATOMIC_SEQ_CST);
+}
+
+static inline uint64_t atomic_fetch_and(atomic64_t *ptr, uint64_t val)
+{
+    return __atomic_fetch_and(&ptr->value, val, __ATOMIC_SEQ_CST);
+}
+
+static inline bool atomic_compare_exchange_strong(atomic64_t *ptr, uint64_t *expected, uint64_t desired)
+{
+    return atomic_compare_exchange_64(ptr, expected, desired);
 }
 
 // ====================================
@@ -261,6 +410,20 @@ uint64_t arch_get_timestamp(void);
 void arch_halt(void);
 void arch_pause(void);
 
+// CPU Management
+uint32_t arch_get_current_cpu(void);
+// arch_interrupt_init() déclaré dans kernel.h
+void arch_timer_init(void);
+void arch_disable_interrupts(void);
+
+// Syscall interface
+void syscall_entry(void);
+
+// Memory translation (if not already defined in arch.h)
+#ifndef PHYS_TO_VIRT
+#define PHYS_TO_VIRT(addr) ((addr) + 0xFFFF800000000000ULL)
+#endif
+
 // Memory
 void *memset(void *s, int c, size_t n);
 void *memcpy(void *dest, const void *src, size_t n);
@@ -270,5 +433,12 @@ int strcmp(const char *s1, const char *s2);
 int strncmp(const char *s1, const char *s2, size_t n);
 char *strcpy(char *dest, const char *src);
 int snprintf(char *str, size_t size, const char *format, ...);
+// va_* macros for freestanding environment
+typedef char *va_list;
+#define va_start(v, l) ((v) = (char *)&(l) + sizeof(l))
+#define va_end(v) ((v) = (char *)0)
+#define va_arg(v, l) (*(l *)(((v) += sizeof(l)) - sizeof(l)))
+
+int kvprintf(const char *format, va_list args);
 
 #endif // ORION_TYPES_H

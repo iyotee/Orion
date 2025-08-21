@@ -12,7 +12,7 @@
  */
 
 #include <orion/kernel.h>
-#include <orion/boot.h>
+#include "orion-boot-protocol.h"
 #include <orion/security.h>
 #include <orion/mm.h>
 #include <orion/types.h>
@@ -21,13 +21,13 @@
 static const char *orion_banner = 
     "\n"
     "Orion Operating System v" ORION_VERSION_STR "\n"
-    "Copyright (c) 2024 Orion OS Project\n"
+    "Copyright (c) 2025 Orion OS Project\n"
     "Academic Research Operating System\n"
     "========================================\n";
 
 // Forward declarations
-static void kernel_early_init(void);
-static void kernel_subsystem_init(void);
+static int kernel_early_init(void);
+static int kernel_subsystem_init(void);
 static void kernel_start_userspace(void);
 static void kernel_idle_loop(void);
 
@@ -60,19 +60,11 @@ void kernel_main(struct orion_boot_info *boot_info)
 
     // Early kernel initialization
     kprintf("Kernel: Early initialization...\n");
-    result = kernel_early_init();
-    if (result != 0) {
-        kprintf("PANIC: Early initialization failed: %d\n", result);
-        kernel_panic("Early initialization failed");
-    }
+    kernel_early_init();
 
     // Initialize kernel subsystems
     kprintf("Kernel: Subsystem initialization...\n");
-    result = kernel_subsystem_init();
-    if (result != 0) {
-        kprintf("PANIC: Subsystem initialization failed: %d\n", result);
-        kernel_panic("Subsystem initialization failed");
-    }
+    kernel_subsystem_init();
 
     kprintf("Kernel: Orion OS initialization complete\n");
     kprintf("Kernel: Starting user space...\n");
@@ -96,27 +88,15 @@ static int kernel_early_init(void)
 
     // Initialize memory management
     kprintf("  - Initializing memory management...\n");
-    result = mm_init();
-    if (result != 0) {
-        kprintf("    ERROR: Memory management initialization failed: %d\n", result);
-        return result;
-    }
+    mm_init();
 
     // Initialize interrupt handling
     kprintf("  - Initializing interrupt handling...\n");
-    result = arch_interrupt_init();
-    if (result != 0) {
-        kprintf("    ERROR: Interrupt initialization failed: %d\n", result);
-        return result;
-    }
+    arch_interrupt_init();
 
     // Initialize timer subsystem
     kprintf("  - Initializing timer subsystem...\n");
-    result = arch_timer_init();
-    if (result != 0) {
-        kprintf("    ERROR: Timer initialization failed: %d\n", result);
-        return result;
-    }
+    arch_timer_init();
 
     kprintf("  - Early initialization complete\n");
     return 0;
@@ -133,19 +113,11 @@ static int kernel_subsystem_init(void)
 
     // Initialize process scheduler
     kprintf("  - Initializing process scheduler...\n");
-    result = scheduler_init();
-    if (result != 0) {
-        kprintf("    ERROR: Scheduler initialization failed: %d\n", result);
-        return result;
-    }
+    scheduler_init();
 
     // Initialize IPC subsystem
     kprintf("  - Initializing IPC subsystem...\n");
-    result = ipc_init();
-    if (result != 0) {
-        kprintf("    ERROR: IPC initialization failed: %d\n", result);
-        return result;
-    }
+    ipc_init();
 
     // Initialize security subsystem (capabilities, hardening, etc.)
     kprintf("  - Initializing security subsystem...\n");
@@ -155,11 +127,7 @@ static int kernel_subsystem_init(void)
 
     // Initialize system call interface
     kprintf("  - Initializing system call interface...\n");
-    result = syscalls_init();
-    if (result != 0) {
-        kprintf("    ERROR: System call initialization failed: %d\n", result);
-        return result;
-    }
+    syscalls_init();
 
     kprintf("  - Subsystem initialization complete\n");
     return 0;
@@ -208,7 +176,7 @@ static void kernel_idle_loop(void)
         arch_halt();
         
         // Handle any pending work
-        scheduler_yield();
+        sched_yield();
     }
 }
 

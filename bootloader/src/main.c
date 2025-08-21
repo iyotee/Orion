@@ -54,8 +54,8 @@ EFI_STATUS prepare_orion_boot_info(struct orion_boot_info **boot_info, UINTN *in
     
     // Ajouter les informations du bootloader
     bl_info = (struct orion_bootloader_info*)((UINT8*)info + sizeof(struct orion_boot_info));
-    bl_info->type = ORION_INFO_BOOTLOADER;
-    bl_info->size = sizeof(struct orion_bootloader_info);
+    bl_info->header.type = ORION_INFO_BOOTLOADER;
+    bl_info->header.size = sizeof(struct orion_bootloader_info);
     // Copier les chaînes en utilisant des boucles simples
     for (int i = 0; i < 12 && "Orion v2.0"[i]; i++) {
         bl_info->name[i] = "Orion v2.0"[i];
@@ -68,8 +68,8 @@ EFI_STATUS prepare_orion_boot_info(struct orion_boot_info **boot_info, UINTN *in
     
     // Ajouter les informations EFI
     efi_info = (struct orion_efi_info*)((UINT8*)bl_info + sizeof(struct orion_bootloader_info));
-    efi_info->type = ORION_INFO_EFI;
-    efi_info->size = sizeof(struct orion_efi_info);
+    efi_info->header.type = ORION_INFO_EFI;
+    efi_info->header.size = sizeof(struct orion_efi_info);
     efi_info->system_table = (UINT64)SystemTable;
     efi_info->boot_services = (UINT64)SystemTable->BootServices;
     efi_info->runtime_services = (UINT64)SystemTable->RuntimeServices;
@@ -184,7 +184,7 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE handle, EFI_SYSTEM_TABLE *st) {
     
     // Effacer l'écran et afficher la bannière
     SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
-    Print(ORION_BOOT_MESSAGE);
+    Print(L"Orion OS Bootloader v2.0\n");
     
     // Initialiser la console série
     Status = init_serial_console();

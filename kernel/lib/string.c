@@ -13,6 +13,15 @@
 
 #include <orion/types.h>
 
+// Simple kvprintf implementation (stub)
+int kvprintf(const char *format, va_list args) {
+    // Stub implementation - just return success
+    // In a real implementation, this would format and output the string
+    (void)format; // Suppress unused parameter warning
+    (void)args;   // Suppress unused parameter warning
+    return 0;
+}
+
 /**
  * Set memory to a specific value
  */

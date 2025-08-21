@@ -114,8 +114,8 @@ void security_get_stats(uint64_t *capabilities_active, uint64_t *violations_tota
 // These functions must be implemented by each architecture
 
 // Random number generation
-uint64_t arch_get_rdtsc(void);     // Read timestamp counter
-uint64_t arch_get_timestamp(void); // Get current timestamp
+uint64_t arch_get_rdtsc(void); // Read timestamp counter
+// arch_get_timestamp déclaré dans scheduler.h
 
 // Hardware security features
 void arch_enable_smep(void); // Enable SMEP if available
@@ -123,6 +123,6 @@ void arch_enable_smap(void); // Enable SMAP if available
 void arch_enable_umip(void); // Enable UMIP if available
 
 // Address validation
-bool arch_validate_user_address(uint64_t vaddr, uint64_t size, bool write);
+bool arch_validate_user_address(uint64_t vaddr, size_t size, bool write);
 
 #endif // ORION_SECURITY_H

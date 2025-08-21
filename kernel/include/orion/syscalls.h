@@ -39,9 +39,10 @@
 #define SYS_NANOSLEEP 34    // Dormir
 
 // Catégorie: I/O abstraite (35-39)
-#define SYS_IO_SUBMIT 35 // Soumettre I/O
-#define SYS_IO_POLL 36   // Polling I/O
-#define SYS_IO_CANCEL 37 // Annuler I/O
+#define SYS_OPEN 35      // Ouvrir fichier
+#define SYS_IO_SUBMIT 36 // Soumettre I/O
+#define SYS_IO_POLL 37   // Polling I/O
+#define SYS_IO_CANCEL 38 // Annuler I/O
 
 // Catégorie: Objets (40-44)
 #define SYS_OBJ_INFO 40  // Info sur objet
@@ -65,51 +66,8 @@
 
 // Structures pour les appels système
 
-// Structure pour sys_info
-typedef struct
-{
-    char kernel_version[32];
-    uint64_t boot_time;
-    uint64_t current_time;
-    uint64_t total_memory;
-    uint64_t free_memory;
-    uint32_t cpu_count;
-    uint32_t process_count;
-    uint32_t thread_count;
-} or_system_info_t;
-
-// Structure pour sys_vm_map
-typedef struct
-{
-    uint64_t addr;    // Adresse virtuelle (0 = auto)
-    size_t length;    // Taille
-    uint32_t prot;    // Protection (READ|WRITE|EXEC)
-    uint32_t flags;   // Flags (PRIVATE|SHARED|FIXED)
-    or_cap_t backing; // Capability de l'objet backing (0 = anonymous)
-    uint64_t offset;  // Offset dans l'objet backing
-} or_vm_map_t;
-
-// Structure pour messages IPC
-typedef struct
-{
-    or_cap_t target_port; // Port de destination
-    const void *data;     // Données à envoyer
-    size_t data_size;     // Taille des données
-    or_cap_t *caps;       // Capabilities à transférer
-    size_t caps_count;    // Nombre de capabilities
-    uint64_t timeout_ns;  // Timeout en nanosecondes
-} or_msg_send_t;
-
-typedef struct
-{
-    or_cap_t source_port; // Port source (output)
-    void *buffer;         // Buffer pour recevoir
-    size_t buffer_size;   // Taille du buffer
-    or_cap_t *caps;       // Buffer pour capabilities reçues
-    size_t caps_max;      // Nombre max de capabilities
-    size_t caps_received; // Nombre de capabilities reçues (output)
-    uint64_t timeout_ns;  // Timeout
-} or_msg_recv_t;
+// Structures définies dans types.h
+// or_system_info_t, or_vm_map_t, or_msg_send_t, or_msg_recv_t
 
 // Flags pour vm_map
 #define VM_PROT_READ (1 << 0)

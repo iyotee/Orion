@@ -19,23 +19,7 @@
 // STRUCTURES ET TYPES
 // ========================================
 
-// États des processus
-typedef enum {
-    PROC_STATE_READY,
-    PROC_STATE_RUNNING,
-    PROC_STATE_BLOCKED,
-    PROC_STATE_ZOMBIE,
-    PROC_STATE_TERMINATED
-} process_state_t;
-
-// États des threads
-typedef enum {
-    THREAD_STATE_READY,
-    THREAD_STATE_RUNNING,
-    THREAD_STATE_BLOCKED,
-    THREAD_STATE_ZOMBIE,
-    THREAD_STATE_TERMINATED
-} thread_state_t;
+// Note: process_state_t and thread_state_t are defined in scheduler.h
 
 // Note: All structures (thread_t, process_t, cpu_runqueue_t, handle_t) are now defined in scheduler.h
 
@@ -70,8 +54,8 @@ static int copy_string_to_user(char* user_ptr, const char* kernel_str) {
 // ========================================
 
 static bool scheduler_initialized = false;
-static uint32_t next_pid = 1;
-static uint32_t next_tid = 1;
+static atomic64_t next_pid = {1};
+static atomic64_t next_tid = {1};
 static cpu_runqueue_t runqueues[MAX_CPUS];
 static process_t* process_list = NULL;
 static spinlock_t process_list_lock = SPINLOCK_INIT;
@@ -104,6 +88,17 @@ static const uint64_t sched_weights[40] = {
 // ========================================
 // UTILITAIRES ARBRE ROUGE-NOIR
 // ========================================
+
+// Timer tick handler for scheduler
+void scheduler_tick(void) {
+    // TODO: Implement proper CFS scheduling logic
+    // - Check if current thread has exceeded its time slice
+    // - Update runqueue statistics
+    // - Trigger context switch if necessary
+    
+    // For now, just a placeholder
+    // This will be called from timer interrupt handlers
+}
 
 static void rb_set_parent(thread_t* node, thread_t* parent) {
     if (node) node->rb_parent = parent;
@@ -606,8 +601,17 @@ void scheduler_destroy_process(process_t* process) {
             rq->current = NULL;
         }
         // Remove from RB tree if present
-        if (thread->rb_node.rb_parent_color != 0 || thread == rq->rb_root) {
-            rb_erase(&thread->rb_node, &rq->rb_root);
+        if (thread->rb_parent != NULL || thread == rq->rb_root) {
+            // Remove from RB tree (simplified removal)
+            if (thread->rb_parent) {
+                if (thread->rb_parent->rb_left == thread) {
+                    thread->rb_parent->rb_left = thread->rb_left ? thread->rb_left : thread->rb_right;
+                } else {
+                    thread->rb_parent->rb_right = thread->rb_left ? thread->rb_left : thread->rb_right;
+                }
+            } else {
+                rq->rb_root = thread->rb_left ? thread->rb_left : thread->rb_right;
+            }
             rq->nr_running--;
         }
         spinlock_unlock(&rq->lock);
@@ -658,7 +662,9 @@ void handle_cleanup(handle_t* handle) {
         case HANDLE_TYPE_MEMORY:
             // Clean up memory region
             if (handle->object_id) {
-                vmm_free_pages(process->vm_space, handle->object_id, 1);
+                // TODO: Get process context for memory cleanup
+                // For now, just mark as cleaned
+                kdebug("Memory handle cleanup not yet implemented");
             }
             break;
             

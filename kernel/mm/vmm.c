@@ -29,7 +29,7 @@
 // Page table configuration
 #define PT_ENTRIES          512                    // Entries per page table
 #define PT_SHIFT           9                      // 9 bits per level
-#define PAGE_MASK          0xFFFFFFFFFFFFF000ULL  // Page alignment mask
+// PAGE_MASK already defined in types.h
 
 // Advanced VMM features
 #define VMM_MAX_REGIONS    1024                   // Max memory regions per space
@@ -510,40 +510,7 @@ vm_space_t* vmm_get_kernel_space(void) {
 // ADVANCED TLB MANAGEMENT
 // ========================================
 
-// Invalidate a single page in TLB
-void mmu_invalidate_page(uint64_t vaddr) {
-    // Align to page boundary
-    vaddr &= PAGE_MASK;
-    
-    // Architecture-specific TLB invalidation
-    __asm__ volatile ("invlpg (%0)" :: "r" (vaddr) : "memory");
-    
-    // Track TLB operations for optimization
-    pending_tlb_flushes++;
-    
-    // Add entropy from TLB operations
-    security_add_entropy(vaddr ^ arch_get_timestamp());
-}
-
-// Flush entire TLB
-void mmu_flush_tlb(void) {
-    // Increment global generation counter
-    atomic_fetch_add(&global_tlb_generation, 1);
-    
-    // Architecture-specific full TLB flush
-    uint64_t cr3 = read_cr3();
-    __asm__ volatile (
-        "mov %0, %%cr3"
-        :
-        : "r" (cr3)
-        : "memory"
-    );
-    
-    pending_tlb_flushes = 0;
-    
-    kdebug("TLB flushed (generation %llu)", 
-           (unsigned long long)atomic_load(&global_tlb_generation));
-}
+// Note: mmu_invalidate_page and mmu_flush_tlb are implemented in arch/x86_64/mmu.c
 
 // Smart TLB flush - only flush if many pages are pending
 static void mmu_smart_tlb_flush(void) {
@@ -556,70 +523,7 @@ static void mmu_smart_tlb_flush(void) {
 // VIRTUAL TO PHYSICAL TRANSLATION
 // ========================================
 
-// Walk page tables to translate virtual to physical address
-uint64_t mmu_virt_to_phys(uint64_t vaddr) {
-    if (!vmm_initialized) {
-        return 0;
-    }
-    
-    // Get current page table base
-    uint64_t pml4_phys = read_cr3() & PAGE_MASK;
-    
-    // Extract page table indices
-    uint64_t pml4_idx = (vaddr >> 39) & 0x1FF;
-    uint64_t pdpt_idx = (vaddr >> 30) & 0x1FF;
-    uint64_t pd_idx   = (vaddr >> 21) & 0x1FF;
-    uint64_t pt_idx   = (vaddr >> 12) & 0x1FF;
-    uint64_t offset   = vaddr & 0xFFF;
-    
-    // Walk PML4
-    uint64_t* pml4 = (uint64_t*)PHYS_TO_VIRT(pml4_phys);
-    if (!(pml4[pml4_idx] & PTE_PRESENT)) {
-        return 0; // Not mapped
-    }
-    
-    // Walk PDPT
-    uint64_t pdpt_phys = pml4[pml4_idx] & PAGE_MASK;
-    uint64_t* pdpt = (uint64_t*)PHYS_TO_VIRT(pdpt_phys);
-    if (!(pdpt[pdpt_idx] & PTE_PRESENT)) {
-        return 0; // Not mapped
-    }
-    
-    // Check for 1GB pages
-    if (pdpt[pdpt_idx] & (1ULL << 7)) { // PS bit
-        uint64_t page_phys = pdpt[pdpt_idx] & 0xFFFFC0000000ULL;
-        return page_phys + (vaddr & 0x3FFFFFFFULL);
-    }
-    
-    // Walk PD
-    uint64_t pd_phys = pdpt[pdpt_idx] & PAGE_MASK;
-    uint64_t* pd = (uint64_t*)PHYS_TO_VIRT(pd_phys);
-    if (!(pd[pd_idx] & PTE_PRESENT)) {
-        return 0; // Not mapped
-    }
-    
-    // Check for 2MB pages
-    if (pd[pd_idx] & (1ULL << 7)) { // PS bit
-        uint64_t page_phys = pd[pd_idx] & 0xFFFFFFE00000ULL;
-        return page_phys + (vaddr & 0x1FFFFFULL);
-    }
-    
-    // Walk PT
-    uint64_t pt_phys = pd[pd_idx] & PAGE_MASK;
-    uint64_t* pt = (uint64_t*)PHYS_TO_VIRT(pt_phys);
-    if (!(pt[pt_idx] & PTE_PRESENT)) {
-        return 0; // Not mapped
-    }
-    
-    // 4KB page
-    uint64_t page_phys = pt[pt_idx] & PAGE_MASK;
-    return page_phys + offset;
-}
-
-// Check if virtual address is valid (mapped)
-bool mmu_is_valid_addr(uint64_t vaddr) {
-    return mmu_virt_to_phys(vaddr) != 0;
-}
+// Note: mmu_virt_to_phys and mmu_is_valid_addr are implemented in arch/x86_64/mmu.c
 
 // ========================================
 // ADVANCED PAGE ALLOCATION

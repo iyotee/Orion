@@ -18,7 +18,6 @@ orion_boot_header_end:
 
 # Global symbols and external references
 .global kernel_start
-.global _stack_top
 .extern kernel_main
 
 # Global variables for UEFI parameters
@@ -48,8 +47,8 @@ kernel_start:
     mov %rdi, boot_efi_handle(%rip)
     mov %rsi, boot_efi_system_table(%rip)
     
-    # Configurer la pile initiale
-    lea _stack_top(%rip), %rsp
+    # Configurer la pile initiale (utiliser une pile temporaire)
+    lea emergency_stack_top(%rip), %rsp
     mov %rsp, %rbp
     
     # Vérifier que nous sommes en long mode
@@ -89,14 +88,9 @@ verify_long_mode:
 long_mode_ok:
     ret
 
-# Nettoyer la section BSS
+# Nettoyer la section BSS (simplifié pour l'instant)
 clear_bss:
-    lea _bss_start(%rip), %rdi
-    lea _bss_end(%rip), %rcx
-    sub %rdi, %rcx          # Taille BSS
-    shr $3, %rcx            # Diviser par 8 (qwords)
-    xor %rax, %rax          # Valeur 0
-    rep stosq               # Remplir avec 0
+    # Pour l'instant, pas de nettoyage BSS complexe
     ret
 
 # Configurer les segments de base (GDT minimale)

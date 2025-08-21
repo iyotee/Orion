@@ -16,6 +16,8 @@
 
 #include <orion/types.h>
 #include <orion/scheduler.h>
+// orion_boot_info structure forward declaration
+struct orion_boot_info;
 
 // Orion kernel version information
 #define ORION_VERSION_MAJOR 1
@@ -24,19 +26,11 @@
 #define ORION_VERSION_STR "1.0.0-alpha"
 
 // System limits and constraints
-#define MAX_CPUS 256
 #define MAX_PROCESSES 65536
 #define MAX_THREADS 1048576
 #define MAX_CAPABILITIES 4294967296ULL
 
-// Process and thread states
-typedef enum
-{
-    THREAD_READY,
-    THREAD_RUNNING,
-    THREAD_BLOCKED,
-    THREAD_ZOMBIE
-} thread_state_t;
+// Note: MAX_CPUS and thread_state_t are defined in scheduler.h
 
 // Structure CPU info
 typedef struct cpu_info
@@ -60,8 +54,7 @@ typedef struct system_info
 } system_info_t;
 
 // Fonctions principales du noyau
-NORETURN void kernel_main(void);
-void kernel_early_init(void);
+void kernel_main(struct orion_boot_info *boot_info);
 void kernel_late_init(void);
 
 // Gestion de la mémoire
@@ -70,8 +63,17 @@ void *kmalloc(uint64_t size);
 void kfree(void *ptr);
 
 // Planificateur
-void sched_init(void);
 void sched_yield(void);
+void scheduler_init(void);
+
+// Initialisation des sous-systèmes
+void arch_interrupt_init(void);
+void arch_timer_init(void);
+void ipc_init(void);
+void syscalls_init(void);
+void capabilities_init(void);
+void security_init(void);
+void arch_disable_interrupts(void);
 
 // Gestion des interruptions
 void irq_init(void);
@@ -88,21 +90,23 @@ int kprintf(const char *fmt, ...);
 #ifdef _MSC_VER
 void cli(void);
 void hlt(void);
-uint64_t read_cr3(void);
 #else
 static inline void cli(void) { __asm__ volatile("cli"); }
 static inline void hlt(void) { __asm__ volatile("hlt"); }
-static inline uint64_t read_cr3(void)
-{
-    uint64_t cr3;
-    __asm__ volatile("mov %%cr3, %0" : "=r"(cr3));
-    return cr3;
-}
 #endif
 
+// Note: read_cr3 is declared in mm.h and implemented in arch/x86_64/cpu.c
+
 // Panic et gestion d'erreurs
-NORETURN void panic(const char *fmt, ...);
+// panic() déclaré dans types.h
 NORETURN void kernel_halt(void);
+void kernel_panic(const char *message);
+
+// Boot functions
+struct orion_boot_info;
+int orion_boot_init(const struct orion_boot_info *boot_info);
+int orion_boot_validate(const struct orion_boot_info *boot_info);
+void orion_boot_debug_print(const struct orion_boot_info *boot_info);
 
 // Macros de debugging
 #define KLOG_EMERGENCY 0

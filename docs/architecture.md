@@ -8,17 +8,17 @@ Orion OS is a modern hybrid micro-kernel operating system designed for performan
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    USER SPACE                               │
+│                          USER SPACE                         │
 ├─────────────────────────────────────────────────────────────┤
-│  Applications  │  Libraries  │  Shell  │  Rust Drivers     │
+│  Applications  │  Libraries  │  Shell  │  Rust Drivers      │
 ├─────────────────────────────────────────────────────────────┤
-│                    KERNEL SPACE                             │
+│                        KERNEL SPACE                         │
 ├─────────────────────────────────────────────────────────────┤
-│  VFS  │  Network  │  Security  │  IPC  │  Scheduler  │ MM  │
+│  VFS  │  Network  │  Security  │  IPC  │  Scheduler  │ MM   │
 ├─────────────────────────────────────────────────────────────┤
-│              Hybrid Micro-Kernel Core (C11)                │
+│                Hybrid Micro-Kernel Core (C11)               │
 ├─────────────────────────────────────────────────────────────┤
-│                    Hardware Layer                           │
+│                        Hardware Layer                       │
 └─────────────────────────────────────────────────────────────┘
 ```
 

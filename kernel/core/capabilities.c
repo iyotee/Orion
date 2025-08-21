@@ -15,12 +15,13 @@
 #include <orion/types.h>
 #include <orion/mm.h>
 #include <orion/scheduler.h>
+#include <arch.h>
 
 // ========================================
 // CONSTANTES DE SÉCURITÉ
 // ========================================
 
-#define MAX_CAPABILITIES        65536
+// MAX_CAPABILITIES défini dans kernel.h
 #define MAX_SECURITY_CONTEXTS   1024
 #define MAX_AUDIT_ENTRIES       4096
 #define ENTROPY_POOL_SIZE       4096

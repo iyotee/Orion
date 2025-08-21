@@ -12,6 +12,153 @@
 #include <orion/kernel.h>
 #include <orion/mm.h>
 #include <orion/syscalls.h>
+// Ne pas inclure string.h système - utiliser nos propres fonctions
+
+// Simple strchr implementation for kernel
+static char *strchr(const char *s, int c) {
+    while (*s) {
+        if (*s == c) return (char*)s;
+        s++;
+    }
+    return (c == 0) ? (char*)s : NULL;
+}
+
+// Simple strncpy implementation for kernel
+static char *strncpy(char *dest, const char *src, size_t n) {
+    size_t i;
+    for (i = 0; i < n && src[i] != '\0'; i++) {
+        dest[i] = src[i];
+    }
+    for (; i < n; i++) {
+        dest[i] = '\0';
+    }
+    return dest;
+}
+
+// Simple strtok implementation for kernel
+static char *shell_strtok(char *str, const char *delim) {
+    static char *saved_str = NULL;
+    if (str != NULL) saved_str = str;
+    if (saved_str == NULL) return NULL;
+    
+    // Skip leading delimiters
+    while (*saved_str && strchr(delim, *saved_str)) saved_str++;
+    if (*saved_str == '\0') return NULL;
+    
+    char *token_start = saved_str;
+    // Find end of token
+    while (*saved_str && !strchr(delim, *saved_str)) saved_str++;
+    
+    if (*saved_str) {
+        *saved_str = '\0';
+        saved_str++;
+    } else {
+        saved_str = NULL;
+    }
+    
+    return token_start;
+}
+
+// va_* macros for freestanding environment
+typedef char* va_list;
+// Macros va_* définies dans types.h
+
+// ====================================
+// COMMAND FUNCTION STUBS
+// ====================================
+
+int cmd_help(int argc, char* argv[]) { 
+    kinfo("Help: Available commands listed"); 
+    return 0; 
+}
+int cmd_version(int argc, char* argv[]) { 
+    kinfo("Orion OS Kernel v1.0.0"); 
+    return 0; 
+}
+int cmd_sysinfo(int argc, char* argv[]) { 
+    kinfo("System info stub"); 
+    return 0; 
+}
+int cmd_uptime(int argc, char* argv[]) { 
+    kinfo("Uptime stub"); 
+    return 0; 
+}
+int cmd_ps(int argc, char* argv[]) { 
+    kinfo("Process list stub"); 
+    return 0; 
+}
+int cmd_kill(int argc, char* argv[]) { 
+    kinfo("Kill process stub"); 
+    return 0; 
+}
+int cmd_top(int argc, char* argv[]) { 
+    kinfo("Top processes stub"); 
+    return 0; 
+}
+int cmd_meminfo(int argc, char* argv[]) { 
+    kinfo("Memory info stub"); 
+    return 0; 
+}
+int cmd_memtest(int argc, char* argv[]) { 
+    kinfo("Memory test stub"); 
+    return 0; 
+}
+int cmd_memmap(int argc, char* argv[]) { 
+    kinfo("Memory map stub"); 
+    return 0; 
+}
+int cmd_reboot(int argc, char* argv[]) { 
+    kinfo("Reboot stub"); 
+    return 0; 
+}
+int cmd_shutdown(int argc, char* argv[]) { 
+    kinfo("Shutdown stub"); 
+    return 0; 
+}
+int cmd_trace(int argc, char* argv[]) { 
+    kinfo("Trace stub"); 
+    return 0; 
+}
+int cmd_profile(int argc, char* argv[]) { 
+    kinfo("Profile stub"); 
+    return 0; 
+}
+int cmd_benchmark(int argc, char* argv[]) { 
+    kinfo("Benchmark stub"); 
+    return 0; 
+}
+int cmd_history(int argc, char* argv[]) { 
+    kinfo("History stub"); 
+    return 0; 
+}
+int cmd_alias(int argc, char* argv[]) { 
+    kinfo("Alias stub"); 
+    return 0; 
+}
+int cmd_clear(int argc, char* argv[]) { 
+    kinfo("Clear stub"); 
+    return 0; 
+}
+int cmd_exit(int argc, char* argv[]) { 
+    kinfo("Exit stub"); 
+    return 0; 
+}
+int cmd_echo(int argc, char* argv[]) { 
+    kinfo("Echo stub"); 
+    return 0; 
+}
+int cmd_tutorial(int argc, char* argv[]) { 
+    kinfo("Tutorial stub"); 
+    return 0; 
+}
+int cmd_demo(int argc, char* argv[]) { 
+    kinfo("Demo stub"); 
+    return 0; 
+}
+int cmd_explain(int argc, char* argv[]) { 
+    kinfo("Explain stub"); 
+    return 0; 
+}
 
 // ====================================
 // GLOBAL SHELL STATE
@@ -484,11 +631,11 @@ int shell_parse_cmdline(const char *cmdline, int *argc, char **argv) {
     *argc = 0;
     
     // Simple parser - split on spaces
-    char *token = strtok((char*)cmdline, " \t\n");
+    char *token = shell_strtok((char*)cmdline, " \t\n");
     while (token && *argc < ORION_SHELL_MAX_ARGS - 1) {
         argv[*argc] = token;
         (*argc)++;
-        token = strtok(NULL, " \t\n");
+        token = shell_strtok(NULL, " \t\n");
     }
     
     argv[*argc] = NULL;

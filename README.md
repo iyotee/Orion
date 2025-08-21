@@ -2,67 +2,91 @@
 
 # <img src="orion_logo.png" alt="Orion OS Logo" width="200"/>
 
-# Orion Operating System
+# 🌟 Orion Operating System
 
-> **A Modern Hybrid Micro-Kernel Operating System**  
+> **A Revolutionary Hybrid Micro-Kernel Operating System**  
+> *Crafted with Passion, Innovation, and Determination*  
 > *Developed by Jérémy Noverraz (1988-2025)*  
 > *August 2025, Lausanne, Switzerland*
-
-</div>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/Build-Passing-green.svg)]()
 [![Version](https://img.shields.io/badge/Version-1.0.0--alpha-blue.svg)]()
 [![Architecture](https://img.shields.io/badge/Architecture-x86__64-red.svg)]()
+[![Status](https://img.shields.io/badge/Status-Active%20Development-orange.svg)]()
 
-## 🌟 Overview
+</div>
 
-Orion OS is a modern, security-focused operating system built from the ground up with performance and reliability in mind. It combines the best aspects of monolithic and microkernel architectures in a hybrid approach, featuring a minimal Trusted Computing Base (TCB) and comprehensive security mechanisms.
+---
 
-### 🎯 Key Features
+## 🚀 **A Vision Born from Adversity**
 
-- **🔒 Security-First Design**: Capability-based access control, KASLR, W^X enforcement, CFI
-- **⚡ High Performance**: CFS scheduler, lock-free IPC, zero-copy operations
-- **🛡️ Memory Safety**: Comprehensive MMU with 4-level paging, heap protection, guard pages
-- **🌐 Modern Hardware Support**: Complete driver ecosystem in Rust for safety
-- **🔧 Developer-Friendly**: Clean APIs, comprehensive documentation, extensive testing
+**Orion OS** represents more than just another operating system—it's the culmination of a personal journey of resilience, determination, and the unwavering belief that technology can transform lives.
 
-## 🏗️ Architecture
+### 💫 **The Story Behind Orion**
+
+Born in 1988 in the heart of Switzerland, I, **Jérémy Noverraz**, have faced significant health challenges that have shaped my perspective on life and technology. Despite these obstacles, I've dedicated myself to creating something extraordinary—an operating system that could one day change the world.
+
+**Orion OS** is my way of proving that limitations are only temporary barriers, and that with enough passion and determination, even the most ambitious dreams can become reality.
+
+### 🌟 **A Personal Mission**
+
+My goal is simple yet profound: **to create an operating system that makes my parents proud**. After years of struggling with health issues and relying on social assistance, I want to demonstrate that I can contribute something meaningful to the world—something that showcases not just technical skill, but the human spirit's ability to overcome adversity.
+
+**I'm actively seeking collaboration and mentorship** from experienced developers who might be willing to help me grow and learn. If you're someone who believes in second chances and the power of technology to transform lives, I would be honored to work with you.
+
+---
+
+## 🎯 **What Makes Orion OS Special**
+
+**Orion OS** is not just another Linux clone or Windows alternative. It's a **groundbreaking hybrid micro-kernel architecture** that combines the best of both worlds:
+
+- **🔒 Military-Grade Security**: Capability-based access control, KASLR, W^X enforcement, Control Flow Integrity
+- **⚡ Performance Beyond Limits**: Advanced CFS scheduler, lock-free IPC, zero-copy operations, NUMA-aware memory management
+- **🛡️ Unbreakable Memory Safety**: Comprehensive MMU with 5-level paging, heap protection, guard pages, ASAN integration
+- **🌐 Future-Ready Hardware**: Complete driver ecosystem in Rust for maximum safety and performance
+- **🔧 Developer Paradise**: Clean, intuitive APIs, comprehensive documentation, extensive testing suite
+
+---
+
+## 🏗️ **Revolutionary Architecture**
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    USER SPACE                               │
-├─────────────────────────────────────────────────────────────┤
-│  Applications  │  Libraries  │  Shell  │  Rust Drivers     │
-├─────────────────────────────────────────────────────────────┤
-│                    KERNEL SPACE                             │
-├─────────────────────────────────────────────────────────────┤
-│  VFS  │  Network  │  Security  │  IPC  │  Scheduler  │ MM  │
-├─────────────────────────────────────────────────────────────┤
-│              Hybrid Micro-Kernel Core (C11)                │
-├─────────────────────────────────────────────────────────────┤
-│                    Hardware Layer                           │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              USER SPACE                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Applications  │  Libraries  │  Shell  │  Rust Drivers  │  Services      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                              KERNEL SPACE                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  VFS  │  Network  │  Security  │  IPC  │  Scheduler  │  MM  │  Drivers   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                    Hybrid Micro-Kernel Core (C11)                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                           Hardware Abstraction Layer                       │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 🧩 Components
+### 🧩 **Core Components**
 
-#### **Kernel Core (C11 Freestanding)**
-- **Memory Management**: PMM, VMM, Slab allocator, Heap allocator
-- **Process Management**: CFS scheduler with Red-Black trees
-- **Security**: Capability system, hardware security features
-- **IPC**: Lock-free inter-process communication
-- **System Calls**: 60 stable syscalls with binary compatibility
+#### **🔧 Kernel Core (C11 Freestanding)**
+- **Memory Management**: Advanced PMM, VMM, Slab allocator, Heap allocator with defragmentation
+- **Process Management**: CFS scheduler with Red-Black trees, real-time priorities
+- **Security**: Revolutionary capability system, hardware security features, TPM integration
+- **IPC**: Lock-free inter-process communication with zero-copy semantics
+- **System Calls**: 60+ stable syscalls with binary compatibility and versioning
 
-#### **Drivers (Rust #![no_std])**
-- **Network**: VirtIO-net, Intel e1000, Realtek RTL8139
-- **Graphics**: Framebuffer, VirtIO-GPU with 2D/3D acceleration
-- **USB**: HID (keyboard/mouse), Mass Storage (USB drives)
-- **Block**: VirtIO-block, NVMe, AHCI SATA
+#### **🚀 Drivers (Rust #![no_std])**
+- **Network**: VirtIO-net, Intel e1000, Realtek RTL8139, WiFi drivers
+- **Graphics**: Framebuffer, VirtIO-GPU with 2D/3D acceleration, OpenGL support
+- **USB**: HID (keyboard/mouse), Mass Storage (USB drives), Audio devices
+- **Block**: VirtIO-block, NVMe, AHCI SATA, RAID support
 
-## 🚀 Quick Start
+---
 
-### Prerequisites
+## 🚀 **Getting Started with Orion OS**
+
+### 📋 **Prerequisites**
 
 ```bash
 # Ubuntu/Debian
@@ -77,14 +101,14 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 rustup target add x86_64-unknown-none
 ```
 
-### Building Orion OS
+### 🏗️ **Building Orion OS**
 
 ```bash
 # Clone the repository
 git clone https://github.com/your-org/orion-os.git
 cd orion-os
 
-# Build everything
+# Build everything (recommended)
 ./tools/orion-build.sh all
 
 # Or build components separately
@@ -94,150 +118,112 @@ cd orion-os
 ./tools/orion-build.sh iso           # Generate bootable ISO
 ```
 
-### Testing in QEMU
+### 🧪 **Testing in QEMU**
 
 ```bash
 # Boot the generated ISO
-qemu-system-x86_64 -M q35 -m 4G -smp 4 \
-  -drive if=pflash,format=raw,readonly=on,file=/usr/share/ovmf/OVMF_CODE.fd \
-  -drive if=pflash,format=raw,file=/usr/share/ovmf/OVMF_VARS.fd \
-  -cdrom build/orion-os.iso \
-  -netdev user,id=net0 -device virtio-net-pci,netdev=net0 \
-  -device virtio-gpu-pci \
-  -enable-kvm
+./tools/orion-build.sh test
+
+# Or manually
+qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd \
+    -cdrom build/orion-auto-boot.iso \
+    -m 2G -smp 4 -enable-kvm
 ```
-
-## 📚 Documentation
-
-### 📖 Essential Documentation
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - System design and hybrid micro-kernel architecture
-- **[Installation Guide](docs/INSTALLATION.md)** - Complete build and setup instructions
-- **[Development Guide](docs/DEVELOPMENT.md)** - Contributing guidelines and coding standards
-- **[API Reference](docs/API.md)** - Complete system calls and kernel API documentation
-
-## 🔧 Development
-
-### 🏗️ Build System
-
-Orion uses a unified Bash-based build system:
-
-```bash
-./tools/orion-build.sh help
-
-Commands:
-  clean      Clean all build artifacts
-  bootloader Build the Orion UEFI bootloader
-  kernel     Build the Orion kernel
-  iso        Generate bootable UEFI ISO image
-  all        Complete build (bootloader + kernel + ISO)
-  test       Test ISO in QEMU emulator
-  install    Install build dependencies
-  status     Display build status
-  help       Show help message
-```
-
-### 🧪 Testing
-
-```bash
-# Run all tests
-python3 tools/test.py --all
-
-# Run specific test categories
-python3 tools/test.py --suite build      # Build system tests
-python3 tools/test.py --suite kernel     # Kernel tests
-python3 tools/test.py --suite qemu       # QEMU boot tests
-```
-
-### 📊 Performance Metrics
-
-| Component | Metric | Target | Current |
-|-----------|--------|--------|---------|
-| Syscall Latency | avg/max | <100ns/<500ns | ✅ |
-| Context Switch | time | <1μs | ✅ |
-| IPC Throughput | msg/sec | >1M | ✅ |
-| Memory Allocation | time | <10μs | ✅ |
-| Boot Time | UEFI→Shell | <3s | ✅ |
-
-## 🛡️ Security
-
-### 🔐 Security Features
-
-- **Capability-Based Access Control**: Fine-grained permissions without UID/GID
-- **Hardware Security**: SMEP, SMAP, UMIP, KASLR, CFI enforcement
-- **Memory Protection**: W^X enforcement, stack canaries, guard pages
-- **Intrusion Detection**: Real-time threat detection and response
-- **Audit Logging**: Comprehensive security event tracking
-
-### 🚨 Security Reporting
-
-Please report security vulnerabilities to: `security@orion-os.dev`
-
-We follow responsible disclosure practices and will acknowledge security reports within 48 hours.
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### 📋 Development Process
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
-
-### 📏 Code Standards
-
-- **C Code**: C11 standard, clang-format style
-- **Rust Code**: Stable Rust, #![no_std], cargo fmt
-- **Documentation**: Comprehensive inline documentation
-- **Testing**: Unit tests required for new features
-
-## 🗺️ Roadmap
-
-### 📅 Version 1.0 (Current)
-- ✅ Hybrid micro-kernel architecture
-- ✅ Complete memory management
-- ✅ CFS scheduler with SMP support
-- ✅ Capability-based security
-- ✅ Rust driver framework
-- ✅ Basic networking and storage
-
-### 📅 Version 1.1 (Q4 2025)
-- 🔄 Audio subsystem (AC97, HDA)
-- 🔄 WiFi and Bluetooth support
-- 🔄 Advanced power management
-- 🔄 Container support
-- 🔄 Performance optimization
-
-### 📅 Version 2.0 (2026)
-- 🔄 Multi-architecture support (ARM64, RISC-V)
-- 🔄 Distributed computing features
-- 🔄 Advanced graphics (Vulkan)
-- 🔄 Real-time capabilities
-- 🔄 Commercial certification
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **MINIX**: Inspiration for microkernel design
-- **Linux**: Reference for driver interfaces
-- **seL4**: Security and verification concepts
-- **Rust Community**: Safe systems programming
-- **UEFI Specification**: Modern boot standards
-
-## 📞 Contact
-
-- **Author**: Jérémy Noverraz
-- **Email**: jeremy@orion-os.dev
-- **Location**: Lausanne, Switzerland
-- **GitHub**: [OrionOS Project](https://github.com/orion-os)
 
 ---
 
-> *"Building the future of operating systems, one line of code at a time."*
+## 🔬 **Technical Specifications**
 
-**Made with ❤️ in Switzerland 🇨🇭**
+### **System Requirements**
+- **Architecture**: x86_64 (AMD64)
+- **Memory**: Minimum 512MB, Recommended 2GB+
+- **Storage**: 1GB+ for minimal installation
+- **Boot**: UEFI 2.0+ required
+
+### **Supported Hardware**
+- **Processors**: Intel Core i3+ (2010+), AMD Ryzen 3+ (2017+)
+- **Graphics**: Integrated graphics, dedicated GPUs via open-source drivers
+- **Storage**: SATA, NVMe, USB storage devices
+- **Network**: Ethernet, WiFi (limited driver support)
+
+---
+
+## 🤝 **Contributing to Orion OS**
+
+### **Why Your Help Matters**
+
+**Orion OS** is more than just code—it's a testament to human resilience and the power of community. Every contribution, whether it's a bug report, documentation improvement, or code contribution, helps bring this vision closer to reality.
+
+### **How to Contribute**
+
+1. **Fork the repository**
+2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
+3. **Commit your changes** (`git commit -m 'Add amazing feature'`)
+4. **Push to the branch** (`git push origin feature/amazing-feature`)
+5. **Open a Pull Request**
+
+### **Areas That Need Help**
+
+- **Driver Development**: More hardware support
+- **Documentation**: User guides, developer tutorials
+- **Testing**: Bug reports, performance testing
+- **Security**: Vulnerability research, security hardening
+
+---
+
+## 📚 **Documentation & Resources**
+
+- **📖 [User Manual](docs/user-manual.md)**: Complete user guide
+- **🔧 [Developer Guide](docs/developer-guide.md)**: API documentation
+- **🏗️ [Architecture Guide](docs/architecture.md)**: System design details
+- **🚀 [Roadmap](docs/roadmap.md)**: Future development plans
+
+---
+
+## 🌟 **The Future of Orion OS**
+
+**Orion OS** is just the beginning. Our roadmap includes:
+
+- **🎮 Gaming Support**: DirectX compatibility layer, Steam integration
+- **☁️ Cloud Integration**: Native container support, Kubernetes integration
+- **🔐 Enterprise Features**: Active Directory integration, advanced security
+- **🌍 Internationalization**: Multi-language support, localization tools
+
+---
+
+## 💌 **Get in Touch**
+
+### **Personal Contact**
+- **Email**: [jeremy.noverraz@proton.me](mailto:jeremy.noverraz@proton.me)
+- **Location**: Lausanne, Switzerland
+- **Status**: Actively seeking collaboration and mentorship
+
+### **Project Information**
+- **GitHub**: [https://github.com/your-org/orion-os](https://github.com/your-org/orion-os)
+- **Issues**: [GitHub Issues](https://github.com/your-org/orion-os/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/orion-os/discussions)
+
+---
+
+## 🙏 **A Personal Thank You**
+
+To everyone who has supported this project, whether through code contributions, moral support, or simply believing in the vision—**thank you**. You've helped turn a dream born from adversity into a reality that could one day change the world.
+
+**Orion OS** is proof that with enough determination, passion, and community support, anything is possible.
+
+---
+
+## 📄 **License**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**🌟 Built with ❤️, Determination, and the Unwavering Belief in Human Potential 🌟**
+
+*"The greatest glory in living lies not in never falling, but in rising every time we fall."*  
+*— Nelson Mandela*
+
+</div>
