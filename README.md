@@ -53,17 +53,17 @@ My goal is simple yet profound: **to create an operating system that makes my pa
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              USER SPACE                                    │
+│                              USER SPACE                                     │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  Applications  │  Libraries  │  Shell  │  Rust Drivers  │  Services      │
+│  Applications  │  Libraries  │  Shell  │  Rust Drivers  │  Services         │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                              KERNEL SPACE                                  │
+│                              KERNEL SPACE                                   │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  VFS  │  Network  │  Security  │  IPC  │  Scheduler  │  MM  │  Drivers   │
+│  VFS  │  Network  │  Security  │  IPC  │  Scheduler  │  MM  │  Drivers      │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                    Hybrid Micro-Kernel Core (C11)                          │
+│                    Hybrid Micro-Kernel Core (C11)                           │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                           Hardware Abstraction Layer                       │
+│                           Hardware Abstraction Layer                        │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
