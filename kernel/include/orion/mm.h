@@ -3,39 +3,39 @@
 
 #include <orion/types.h>
 
-// Types pour la gestion mémoire
+// Types for memory management
 
-// Structure pour espace mémoire virtuel
+// Structure for virtual memory space
 typedef struct vm_space
 {
-    uint64_t pml4_phys;  // Adresse physique de la PML4
-    uint64_t start_addr; // Début de l'espace virtuel
-    uint64_t end_addr;   // Fin de l'espace virtuel
-    bool is_kernel;      // Espace noyau ou userland
+    uint64_t pml4_phys;  // Physical address of PML4
+    uint64_t start_addr; // Start of virtual space
+    uint64_t end_addr;   // End of virtual space
+    bool is_kernel;      // Kernel or userland space
 } vm_space_t;
 
-// Structure pour les blocs du heap
+// Structure for heap blocks
 typedef struct heap_block
 {
-    uint32_t magic;          // Magic number pour validation
-    uint64_t size;           // Taille du bloc
-    bool is_free;            // Le bloc est-il libre?
-    struct heap_block *next; // Bloc suivant
-    struct heap_block *prev; // Bloc précédent
+    uint32_t magic;          // Magic number for validation
+    uint64_t size;           // Block size
+    bool is_free;            // Is the block free?
+    struct heap_block *next; // Next block
+    struct heap_block *prev; // Previous block
 } heap_block_t;
 
-// Structure pour cache slab
+// Structure for slab cache
 typedef struct slab
 {
-    uint64_t obj_size;      // Taille des objets
-    uint64_t total_objects; // Nombre total d'objets
-    uint64_t free_objects;  // Nombre d'objets libres
-    void *free_list;        // Liste des blocs libres
-    void *memory;           // Mémoire du slab
-    struct slab *next;      // Slab suivant
+    uint64_t obj_size;      // Object size
+    uint64_t total_objects; // Total number of objects
+    uint64_t free_objects;  // Number of free objects
+    void *free_list;        // Free block list
+    void *memory;           // Slab memory
+    struct slab *next;      // Next slab
 } slab_t;
 
-// Fonctions du Physical Memory Manager (PMM)
+// Physical Memory Manager (PMM) functions
 void pmm_init(void);
 uint64_t pmm_alloc_page(void);
 void pmm_free_page(uint64_t phys_addr);
@@ -43,7 +43,7 @@ uint64_t pmm_alloc_pages(uint64_t count);
 void pmm_free_pages(uint64_t phys_addr, uint64_t count);
 void pmm_get_stats(uint64_t *total, uint64_t *free, uint64_t *used);
 
-// Fonctions du Virtual Memory Manager (VMM)
+// Virtual Memory Manager (VMM) functions
 void vmm_init(void);
 vm_space_t *vmm_create_space(bool is_kernel);
 vm_space_t *vmm_get_kernel_space(void);
@@ -58,28 +58,35 @@ bool mmu_is_valid_addr(uint64_t vaddr);
 void mmu_invalidate_page(uint64_t vaddr);
 void mmu_flush_tlb(void);
 
-// Fonctions architecture-specific
+// Copy-on-Write (COW) functions
+int vmm_mark_cow(vm_space_t *space, uint64_t vaddr);
+int vmm_handle_cow_fault(vm_space_t *space, uint64_t vaddr);
+page_ref_t *vmm_get_page_ref(uint64_t paddr);
+void vmm_inc_page_ref(uint64_t paddr);
+void vmm_dec_page_ref(uint64_t paddr);
+
+// Architecture-specific functions
 uint64_t read_cr3(void);
 
-// Fonctions de l'allocateur Slab
+// Slab allocator functions
 void slab_init(void);
 void *slab_alloc(uint64_t size);
 void slab_free(void *ptr, uint64_t size);
 void slab_get_stats(void);
 
-// Fonctions du Heap noyau
+// Kernel heap functions
 void heap_init(void);
 void heap_get_stats(void);
 
-// Fonctions principales publiques du MM
+// Main public MM functions
 void mm_init(void);
 
-// Fonctions publiques d'allocation
+// Public allocation functions
 void *kmalloc(uint64_t size);
 void kfree(void *ptr);
 void *krealloc(void *ptr, uint64_t new_size);
 
-// Macros utilitaires mémoire
+// Memory utility macros
 #define KMALLOC(type) ((type *)kmalloc(sizeof(type)))
 #define KFREE(ptr)    \
     do                \
@@ -88,7 +95,7 @@ void *krealloc(void *ptr, uint64_t new_size);
         (ptr) = NULL; \
     } while (0)
 
-// Flags pour VMM
+// VMM flags
 #define VM_FLAG_READ (1 << 0)
 #define VM_FLAG_WRITE (1 << 1)
 #define VM_FLAG_EXEC (1 << 2)
@@ -99,9 +106,18 @@ void *krealloc(void *ptr, uint64_t new_size);
 #define PAGE_FLAG_WRITE (1 << 1)
 #define PAGE_FLAG_USER (1 << 2)
 #define PAGE_FLAG_EXEC (1 << 3)
+#define PAGE_FLAG_NO_CACHE (1 << 4)
 #define PAGE_FLAG_ACCESSED (1 << 5)
 #define PAGE_FLAG_DIRTY (1 << 6)
 #define PAGE_FLAG_GLOBAL (1 << 8)
-#define PAGE_FLAG_NO_CACHE (1 << 4)
+#define PAGE_FLAG_COW (1 << 9)    // Copy-on-Write flag
+#define PAGE_FLAG_SHARED (1 << 10) // Shared page flag
+
+// COW-specific page management
+typedef struct page_ref {
+    atomic32_t ref_count;     // Reference counter for shared pages
+    uint64_t physical_addr;   // Physical address
+    spinlock_t lock;          // Lock for atomic operations
+} page_ref_t;
 
 #endif // ORION_MM_H

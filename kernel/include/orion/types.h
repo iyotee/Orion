@@ -4,7 +4,7 @@
  * Core type definitions, macros, and utility functions for the Orion kernel.
  * Provides all fundamental types and macros needed throughout the system.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -14,10 +14,10 @@
 #ifndef ORION_TYPES_H
 #define ORION_TYPES_H
 
-// Types fondamentaux pour Orion
-// C11 freestanding - pas de dépendance à la libc
+// Fundamental types for Orion
+// C11 freestanding - no dependency on libc
 
-// Types entiers standards
+// Standard integer types
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
@@ -28,13 +28,13 @@ typedef signed short int16_t;
 typedef signed int int32_t;
 typedef signed long long int64_t;
 
-// Types tailles
+// Size types
 typedef uint64_t size_t;
 typedef int64_t ssize_t;
 typedef uint64_t uintptr_t;
 typedef int64_t ptrdiff_t;
 
-// Types bool
+// Boolean types
 typedef uint8_t bool;
 #define true 1
 #define false 0
@@ -42,27 +42,27 @@ typedef uint8_t bool;
 // NULL
 #define NULL ((void *)0)
 
-// Capabilities - identifiants 64-bit non-forgeables
+// Capabilities - 64-bit non-forgeable identifiers
 typedef uint64_t or_cap_t;
 
-// Codes d'erreur
+// Error codes
 typedef enum
 {
     OR_OK = 0,
-    OR_EINVAL,    // Argument invalide
-    OR_ENOMEM,    // Mémoire insuffisante
-    OR_ENOSYS,    // Appel système non implémenté
-    OR_EPERM,     // Permission refusée
-    OR_ENOENT,    // Objet non trouvé
-    OR_EAGAIN,    // Ressource temporairement indisponible
+    OR_EINVAL,    // Invalid argument
+    OR_ENOMEM,    // Insufficient memory
+    OR_ENOSYS,    // System call not implemented
+    OR_EPERM,     // Permission denied
+    OR_ENOENT,    // Object not found
+    OR_EAGAIN,    // Resource temporarily unavailable
     OR_ETIMEDOUT, // Timeout
-    OR_EINTR,     // Interrompu
-    OR_EBUSY,     // Ressource occupée
-    OR_EFAULT,    // Adresse invalide
+    OR_EINTR,     // Interrupted
+    OR_EBUSY,     // Resource busy
+    OR_EFAULT,    // Invalid address
     OR_ESRCH,     // Process not found
 } or_error_t;
 
-// Attributs compilateur - compatible MSVC/GCC/Clang
+// Compiler attributes - MSVC/GCC/Clang compatible
 #ifdef _MSC_VER
 #define PACKED
 #define ALIGNED(x) __declspec(align(x))
@@ -81,7 +81,7 @@ typedef enum
 #define CONST __attribute__((const))
 #endif
 
-// Macros utilitaires
+// Utility macros
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -89,12 +89,12 @@ typedef enum
 #define ROUND_DOWN(x, align) ((x) & ~((align) - 1))
 #define IS_ALIGNED(x, align) (((x) & ((align) - 1)) == 0)
 
-// Pages mémoire
+// Memory pages
 #define PAGE_SIZE 4096ULL
 #define PAGE_MASK (PAGE_SIZE - 1)
 #define PAGE_SHIFT 12
 
-// Assertions - actives même en release pour le noyau
+// Assertions - active even in release for kernel
 #define VERIFY(cond)                                                        \
     do                                                                      \
     {                                                                       \
@@ -136,33 +136,33 @@ typedef struct
 // Virtual memory mapping structure
 typedef struct
 {
-    uint64_t addr;    // Adresse virtuelle (0 = auto)
-    size_t length;    // Taille
+    uint64_t addr;    // Virtual address (0 = auto)
+    size_t length;    // Size
     uint32_t prot;    // Protection (READ|WRITE|EXEC)
     uint32_t flags;   // Flags (PRIVATE|SHARED|FIXED)
-    or_cap_t backing; // Capability de l'objet backing (0 = anonymous)
-    uint64_t offset;  // Offset dans l'objet backing
+    or_cap_t backing; // Backing object capability (0 = anonymous)
+    uint64_t offset;  // Offset in backing object
 } or_vm_map_t;
 
 // IPC message structures
 typedef struct
 {
-    or_cap_t target_port; // Port de destination
-    const void *data;     // Données à envoyer
-    size_t data_size;     // Taille des données
-    or_cap_t *caps;       // Capabilities à transférer
-    size_t caps_count;    // Nombre de capabilities
-    uint64_t timeout_ns;  // Timeout en nanosecondes
+    or_cap_t target_port; // Destination port
+    const void *data;     // Data to send
+    size_t data_size;     // Size of data
+    or_cap_t *caps;       // Capabilities to transfer
+    size_t caps_count;    // Number of capabilities
+    uint64_t timeout_ns;  // Timeout in nanoseconds
 } or_msg_send_t;
 
 typedef struct
 {
-    or_cap_t source_port; // Port source (output)
-    void *buffer;         // Buffer pour recevoir
-    size_t buffer_size;   // Taille du buffer
-    or_cap_t *caps;       // Buffer pour capabilities reçues
-    size_t caps_max;      // Nombre max de capabilities
-    size_t caps_received; // Nombre de capabilities reçues (output)
+    or_cap_t source_port; // Source port (output)
+    void *buffer;         // Buffer for receiving
+    size_t buffer_size;   // Size of buffer
+    or_cap_t *caps;       // Buffer for received capabilities
+    size_t caps_max;      // Maximum number of capabilities
+    size_t caps_received; // Number of capabilities received (output)
     uint64_t timeout_ns;  // Timeout
 } or_msg_recv_t;
 
@@ -219,8 +219,8 @@ struct sigevent
 #define ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
 #define ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
 
-// IS_ALIGNED déjà défini ligne 90
-// ARRAY_SIZE déjà défini ligne 85
+// IS_ALIGNED already defined line 90
+// ARRAY_SIZE already defined line 85
 
 #define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
@@ -412,7 +412,7 @@ void arch_pause(void);
 
 // CPU Management
 uint32_t arch_get_current_cpu(void);
-// arch_interrupt_init() déclaré dans kernel.h
+// arch_interrupt_init() declared in kernel.h
 void arch_timer_init(void);
 void arch_disable_interrupts(void);
 

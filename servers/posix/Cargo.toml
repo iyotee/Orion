@@ -1,0 +1,11 @@
+[package]
+name = "orion-posix-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+orion-ipc = { path = "../../lib/orion-ipc" }
+
+[[bin]]
+name = "posix-server"
+path = "src/main.rs"

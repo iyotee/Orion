@@ -1,6 +1,6 @@
-# Outils et utilitaires Orion
+# Orion tools and utilities
 
-# Outils simples en C
+# Simple C tools
 add_executable(orion-hexdump
     hexdump.c
 )
@@ -9,8 +9,8 @@ add_executable(orion-klog
     klog.c
 )
 
-# Ces outils seront principalement en Rust via Cargo
-# Mais on peut avoir quelques utilitaires C simples
+# These tools will mainly be in Rust via Cargo
+# But we can have some simple C utilities
 
 # Installation
 install(TARGETS orion-hexdump orion-klog

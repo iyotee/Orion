@@ -1,43 +1,43 @@
-// Allocateur Slab pour Orion - Objets de tailles fixes
+// Slab allocator for Orion - Fixed-size objects
 #include <orion/types.h>
 #include <orion/mm.h>
 #include <orion/kernel.h>
 
-// Tailles de slabs communes
+// Common slab sizes
 static const size_t slab_sizes[] = {
     16, 32, 64, 128, 256, 512, 1024, 2048, 4096
 };
 
 #define NUM_SLAB_SIZES (sizeof(slab_sizes) / sizeof(slab_sizes[0]))
 
-// Structure d'un bloc libre dans un slab
+// Structure of a free block in a slab
 typedef struct free_block {
     struct free_block* next;
 } free_block_t;
 
-// Structure slab_t définie dans mm.h
+// slab_t structure defined in mm.h
 
-// Cache de slabs pour chaque taille
+// Slab cache for each size
 static slab_t* slab_caches[NUM_SLAB_SIZES];
 static bool slab_initialized = false;
 
-// Créer un nouveau slab pour une taille donnée
+// Create a new slab for a given size
 static slab_t* create_slab(size_t obj_size) {
-    // Allouer une page pour le slab
+    // Allocate a page for the slab
     uint64_t page_phys = pmm_alloc_page();
     if (!page_phys) {
         kerror("Failed to allocate page for slab");
         return NULL;
     }
     
-    // Mapper la page (pour l'instant, identity mapping simpliste)
+    // Map the page (for now, simple identity mapping)
     void* memory = (void*)page_phys;
     
-    // Allouer la structure slab depuis la même page
+    // Allocate slab structure from the same page
     slab_t* slab = (slab_t*)memory;
     memory = (char*)memory + sizeof(slab_t);
     
-    // Calculer combien d'objets on peut stocker
+    // Calculate how many objects we can store
     size_t available_space = PAGE_SIZE - sizeof(slab_t);
     size_t num_objects = available_space / obj_size;
     
@@ -47,7 +47,7 @@ static slab_t* create_slab(size_t obj_size) {
     slab->memory = memory;
     slab->next = NULL;
     
-    // Initialiser la liste des blocs libres
+    // Initialize the free blocks list
     slab->free_list = NULL;
     char* obj_ptr = (char*)memory;
     
@@ -65,11 +65,11 @@ static slab_t* create_slab(size_t obj_size) {
     return slab;
 }
 
-// Initialiser l'allocateur slab
+    // Initialize slab allocator
 void slab_init(void) {
     kinfo("Initializing slab allocator");
     
-    // Initialiser les caches
+    // Initialize the caches
     for (size_t i = 0; i < NUM_SLAB_SIZES; i++) {
         slab_caches[i] = NULL;
     }
@@ -78,48 +78,48 @@ void slab_init(void) {
     kinfo("Slab allocator initialized");
 }
 
-// Trouver l'index de cache pour une taille
+    // Find cache index for a size
 static int find_cache_index(size_t size) {
     for (size_t i = 0; i < NUM_SLAB_SIZES; i++) {
         if (size <= slab_sizes[i]) {
             return i;
         }
     }
-    return -1; // Trop gros pour les slabs
+            return -1; // Too large for slabs
 }
 
-// Allouer un objet depuis les slabs
+    // Allocate an object from slabs
 void* slab_alloc(size_t size) {
     if (!slab_initialized || size == 0) {
         return NULL;
     }
     
-    // Trouver le cache approprié
+    // Find appropriate cache
     int cache_index = find_cache_index(size);
     if (cache_index < 0) {
         kdebug("Size %llu too large for slab allocation", (unsigned long long)size);
         return NULL;
     }
     
-    // Chercher un slab avec des objets libres
+    // Look for a slab with free objects
     slab_t* slab = slab_caches[cache_index];
     while (slab && slab->free_objects == 0) {
         slab = slab->next;
     }
     
-    // Créer un nouveau slab si nécessaire
+    // Create new slab if necessary
     if (!slab) {
         slab = create_slab(slab_sizes[cache_index]);
         if (!slab) {
             return NULL;
         }
         
-        // Ajouter au cache
+        // Add to cache
         slab->next = slab_caches[cache_index];
         slab_caches[cache_index] = slab;
     }
     
-    // Allouer depuis le slab
+    // Allocate from slab
     if (slab->free_list) {
         void* obj = slab->free_list;
         slab->free_list = ((free_block_t*)slab->free_list)->next;
@@ -135,7 +135,7 @@ void* slab_alloc(size_t size) {
     return NULL;
 }
 
-// Libérer un objet vers les slabs
+// Free an object to slabs
 void slab_free(void* ptr, size_t size) {
     if (!slab_initialized || !ptr || size == 0) {
         return;
@@ -147,22 +147,22 @@ void slab_free(void* ptr, size_t size) {
         return;
     }
     
-    // Trouver le slab qui contient cet objet
+    // Find the slab that contains this object
     slab_t* slab = slab_caches[cache_index];
     while (slab) {
-        // Vérifier si l'objet appartient à ce slab
+        // Check if object belongs to this slab
         char* slab_start = (char*)slab->memory;
         char* slab_end = slab_start + (slab->total_objects * slab->obj_size);
         
         if (ptr >= (void*)slab_start && ptr < (void*)slab_end) {
-            // Vérifier l'alignement
+            // Check alignment
             size_t offset = (char*)ptr - slab_start;
             if (offset % slab->obj_size != 0) {
                 kerror("Invalid pointer alignment in slab_free");
                 return;
             }
             
-            // Ajouter à la liste libre
+            // Add to free list
             free_block_t* block = (free_block_t*)ptr;
             block->next = slab->free_list;
             slab->free_list = block;
@@ -178,7 +178,7 @@ void slab_free(void* ptr, size_t size) {
     kerror("Pointer not found in any slab for size %llu", (unsigned long long)size);
 }
 
-// Obtenir statistiques des slabs
+// Get slab statistics
 void slab_get_stats(void) {
     if (!slab_initialized) {
         return;

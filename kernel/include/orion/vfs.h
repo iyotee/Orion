@@ -4,7 +4,7 @@
  * VFS interface definitions and function declarations for the complete
  * virtual file system with security integration and device support.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project

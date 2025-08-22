@@ -1,168 +1,110 @@
-# 🌟 Orion OS - Documentation Complète
+# Orion OS Documentation
 
-> **Documentation Professionnelle et Académique**  
-> *Un guide complet pour comprendre, développer et contribuer à Orion OS*
-
----
-
-## 📖 **Vue d'ensemble de la Documentation**
-
-Cette documentation représente l'effort de création d'un système d'exploitation révolutionnaire par **Jérémy Noverraz**, développeur suisse passionné par la technologie et déterminé à créer quelque chose d'extraordinaire malgré les défis de santé.
-
-**Orion OS** n'est pas seulement un autre système d'exploitation—c'est la preuve que la détermination humaine peut surmonter tous les obstacles.
+> **Academic Documentation Suite**  
+> *Comprehensive technical documentation for the Orion OS project*
 
 ---
 
-## 🗂️ **Structure de la Documentation**
+## Overview
 
-### **🏗️ [ARCHITECTURE.md](ARCHITECTURE.md)**
-**Architecture système et principes de conception**
-- **Design hybride micro-kernel** révolutionnaire
-- **Composants principaux** détaillés
-- **Modèle de sécurité** militaire
-- **Caractéristiques de performance** avancées
-- **Schémas et diagrammes** techniques
-
-### **🔧 [INSTALLATION.md](INSTALLATION.md)**
-**Instructions de build et d'installation complètes**
-- **Prérequis et dépendances** détaillés
-- **Système de build** unifié
-- **Configuration QEMU** pour tests
-- **Guide de dépannage** complet
-- **Environnements de développement** multiples
-
-### **💻 [DEVELOPMENT.md](DEVELOPMENT.md)**
-**Workflow de développement et guidelines**
-- **Structure du projet** détaillée
-- **Standards de code** professionnels
-- **Procédures de test** rigoureuses
-- **Processus de contribution** ouvert
-- **Outils de développement** recommandés
-
-### **📚 [API.md](API.md)**
-**Référence API complète**
-- **Documentation des syscalls** (60+ fonctions)
-- **APIs kernel** détaillées
-- **Framework de drivers** Rust
-- **Codes d'erreur** et protocoles
-- **Exemples de code** pratiques
-
-### **🚀 [USER_GUIDE.md](USER_GUIDE.md)**
-**Guide utilisateur complet** *(Nouveau)*
-- **Premiers pas** avec Orion OS
-- **Interface utilisateur** et shell
-- **Gestion des fichiers** et permissions
-- **Réseau et connectivité**
-- **Dépannage** utilisateur
-
-### **🔐 [SECURITY.md](SECURITY.md)**
-**Guide de sécurité avancé** *(Nouveau)*
-- **Modèle de capacités** détaillé
-- **Protection mémoire** avancée
-- **Sécurité matérielle** (SMEP, SMAP, UMIP)
-- **Audit et logging** de sécurité
-- **Bonnes pratiques** de développement
-
-### **🧪 [TESTING.md](TESTING.md)**
-**Guide de test complet** *(Nouveau)*
-- **Tests unitaires** et d'intégration
-- **Tests de performance** et benchmarks
-- **Tests de sécurité** et pénétration
-- **Tests de compatibilité** matérielle
-- **Automation** des tests
+**Orion OS** is a hybrid microkernel operating system designed for performance, security, and maintainability. The system combines the reliability of microkernels with the performance of monolithic kernels through innovative design patterns.
 
 ---
 
-## 🚀 **Démarrage Rapide**
+## Documentation Structure
 
-### **1. Comprendre l'architecture** → Lire `ARCHITECTURE.md`
-### **2. Configurer l'environnement** → Suivre `INSTALLATION.md`
-### **3. Commencer le développement** → Utiliser `DEVELOPMENT.md`
-### **4. Référence API** → Consulter `API.md` lors du codage
-### **5. Guide utilisateur** → Suivre `USER_GUIDE.md` pour l'usage
-### **6. Sécurité** → Étudier `SECURITY.md` pour la robustesse
+### [ARCHITECTURE.md](ARCHITECTURE.md)
+**System Architecture and Design Principles**
+- Hybrid microkernel design
+- Security model with capabilities
+- Multi-ISA architecture support
+- Performance characteristics
+- Technical specifications
 
----
+### [DEVELOPMENT.md](DEVELOPMENT.md)
+**Development Guide and API Reference**
+- Project structure and build system
+- Code standards and conventions
+- Complete API documentation (60+ system calls)
+- Driver development framework
+- Testing and quality assurance
 
-## 🎯 **Public Cible**
+### [USER_GUIDE.md](USER_GUIDE.md)
+**User Guide and Installation**
+- Installation procedures
+- System configuration
+- User interface and shell
+- File management
+- Network configuration
+- Troubleshooting
 
-### **👨‍💻 Développeurs**
-- **Kernel developers** cherchant une architecture innovante
-- **Driver developers** voulant utiliser Rust pour la sécurité
-- **Security researchers** intéressés par les modèles de capacités
-- **Students** étudiant les systèmes d'exploitation
-
-### **🔬 Chercheurs**
-- **Academic researchers** en systèmes d'exploitation
-- **Security researchers** en protection mémoire
-- **Performance researchers** en microkernels
-- **Industry professionals** cherchant des alternatives
-
-### **🌟 Passionnés**
-- **Open source enthusiasts** voulant contribuer
-- **Technology lovers** intéressés par l'innovation
-- **People who believe in second chances** et le potentiel humain
-
----
-
-## 📊 **Qualité Académique**
-
-Toute la documentation suit les standards académiques avec :
-
-- **🇬🇧 Anglais professionnel** et technique
-- **📋 Spécifications techniques** complètes
-- **💡 Exemples pratiques** et détaillés
-- **🎯 Précision rigoureuse** et vérifiée
-- **📈 Schémas et diagrammes** professionnels
-- **🔍 Références bibliographiques** appropriées
+### [ROADMAP.md](ROADMAP.md)
+**Development Roadmap**
+- Multi-ISA architecture development
+- Future architectural enhancements
+- Technical milestones
+- Strategic objectives
 
 ---
 
-## 🤝 **Contribution à la Documentation**
+## Quick Start
 
-### **Pourquoi votre aide est importante**
-
-La documentation d'Orion OS est un effort communautaire. Chaque amélioration, correction ou ajout aide à rendre ce projet plus accessible et professionnel.
-
-### **Comment contribuer**
-
-1. **Identifier** les sections à améliorer
-2. **Proposer** des améliorations via Issues
-3. **Soumettre** des Pull Requests avec corrections
-4. **Tester** la documentation sur différents publics
-5. **Partager** vos connaissances et expériences
+1. **Architecture** → Read `ARCHITECTURE.md` for system design
+2. **Development** → Follow `DEVELOPMENT.md` for setup and APIs
+3. **Installation** → Follow `USER_GUIDE.md` for deployment
+4. **Roadmap** → Consult `ROADMAP.md` for future development
 
 ---
 
-## 📞 **Support et Contact**
+## Target Audience
 
-### **Contact Personnel**
-- **Email**: [jeremy.noverraz@proton.me](mailto:jeremy.noverraz@proton.me)
-- **Localisation**: Lausanne, Suisse
-- **Statut**: Recherche active de collaboration et mentorat
+### Developers
+- Kernel developers interested in microkernel architecture
+- Driver developers using Rust for systems programming
+- Security researchers studying capability-based models
+- Students learning operating systems concepts
 
-### **Support Projet**
+### Researchers
+- Academic researchers in operating systems
+- Security researchers in memory protection
+- Performance researchers in microkernel design
+- Industry professionals evaluating alternatives
+
+### Contributors
+- Open source developers wanting to contribute
+- Systems programmers interested in innovation
+- Technical writers improving documentation
+
+---
+
+## Contributing
+
+The Orion OS documentation is a collaborative effort. Contributions are welcome to improve clarity, accuracy, and completeness.
+
+### How to Contribute
+
+1. Identify areas for improvement
+2. Submit issues for discussion
+3. Create pull requests with improvements
+4. Follow documentation standards
+5. Test changes with target audiences
+
+---
+
+## Support
+
+### Project Resources
 - **Issues**: [GitHub Issues](https://github.com/iyotee/Orion/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/iyotee/Orion/discussions)
 - **Wiki**: [Documentation Wiki](https://github.com/iyotee/Orion/wiki)
 
----
-
-## 🙏 **Remerciements**
-
-À tous ceux qui ont contribué à cette documentation, que ce soit par des corrections, des suggestions ou simplement en croyant en la vision—**merci**. Vous aidez à transformer un rêve né de l'adversité en une réalité accessible à tous.
-
----
-
-<div align="center">
-
-**🌟 Documentation créée avec ❤️, Détermination et la Croyance en le Potentiel Humain 🌟**
-
-*"La connaissance est le pouvoir, et la documentation est la clé de ce pouvoir."*
-
-</div>
+### Technical Support
+- Review existing documentation
+- Search GitHub issues for known problems
+- Consult the development community
 
 ---
 
-*Développé par Jérémy Noverraz (1988-2025)*  
-*Août 2025, Lausanne, Suisse*
+## License
+
+This documentation is released under the same license as the Orion OS project. See the main repository for license details.

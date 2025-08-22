@@ -2,7 +2,7 @@
 name = "orion-driver"
 version = "0.1.0"
 edition = "2021"
-authors = ["Jérémy Noverraz <jeremy@orion-os.dev>"]
+authors = ["Jeremy Noverraz <jeremy@orion-os.dev>"]
 description = "Rust driver framework for Orion OS userland drivers"
 license = "MIT"
 keywords = ["orion", "driver", "kernel", "operating-system", "rust"]

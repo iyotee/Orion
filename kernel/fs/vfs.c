@@ -4,7 +4,7 @@
  * Complete VFS implementation with device drivers, file operations,
  * and directory management. Supports multiple file system types.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -542,11 +542,54 @@ int vfs_open(const char* path, uint32_t flags, uint32_t mode, vfs_file_t** file_
         return -OR_EMFILE; // Too many open files
     }
     
-    // TODO: Path resolution and dentry lookup
-    // For now, create a placeholder file structure
+    // Path resolution and dentry lookup
+    vfs_inode_t* inode = NULL;
+    vfs_dentry_t* dentry = NULL;
+    
+    // Resolve path to inode
+    int resolve_result = vfs_path_resolve(path, &inode, &dentry);
+    if (resolve_result != OR_OK) {
+        kerror("Failed to resolve path '%s': %d", path, resolve_result);
+        return resolve_result;
+    }
+    
+    // Check if file exists and permissions
+    if (!inode) {
+        if (!(flags & O_CREAT)) {
+            return -OR_ENOENT; // File doesn't exist and O_CREAT not specified
+        }
+        
+        // Create new file
+        inode = vfs_create_inode(path, mode, current ? current->pid : 0);
+        if (!inode) {
+            return -OR_ENOMEM;
+        }
+        
+        // Create dentry for new file
+        dentry = vfs_create_dentry(path, inode);
+        if (!dentry) {
+            inode_put(inode);
+            return -OR_ENOMEM;
+        }
+    } else {
+        // File exists, check permissions
+        if (!vfs_check_permissions(inode, flags, current)) {
+            inode_put(inode);
+            return -OR_EACCES;
+        }
+        
+        // Check if trying to open directory for writing
+        if (S_ISDIR(inode->i_mode) && (flags & (O_WRONLY | O_RDWR))) {
+            inode_put(inode);
+            return -OR_EISDIR;
+        }
+    }
+    
+    // Create file structure with resolved inode
     
     vfs_file_t* file = (vfs_file_t*)kmalloc(sizeof(vfs_file_t));
     if (!file) {
+        inode_put(inode);
         return -OR_ENOMEM;
     }
     
@@ -556,6 +599,17 @@ int vfs_open(const char* path, uint32_t flags, uint32_t mode, vfs_file_t** file_
     file->f_flags = flags;
     file->f_mode = mode;
     file->f_pos = 0;
+    file->f_inode = inode;
+    file->f_dentry = dentry;
+    
+    // Set file operations based on inode type
+    if (S_ISREG(inode->i_mode)) {
+        file->f_op = &vfs_file_ops;
+    } else if (S_ISDIR(inode->i_mode)) {
+        file->f_op = &vfs_dir_ops;
+    } else if (S_ISCHR(inode->i_mode) || S_ISBLK(inode->i_mode)) {
+        file->f_op = &vfs_device_ops;
+    }
     
     if (current) {
         file->f_owner_pid = current->pid;

@@ -4,7 +4,7 @@
  * Professional-grade driver for Intel e1000 series network adapters.
  * Supports hardware features like TSO, checksum offload, and jumbo frames.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -340,7 +340,7 @@ impl OrionDriver for E1000Driver {
         DriverInfo {
             name: "Intel e1000 Network Driver",
             version: "1.0.0",
-            author: "Jérémy Noverraz",
+            author: "Jeremy Noverraz",
             description: "Professional Intel e1000 series Ethernet driver with full feature support",
         }
     }

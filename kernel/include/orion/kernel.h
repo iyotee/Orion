@@ -4,7 +4,7 @@
  * Core kernel definitions, constants, and function declarations.
  * This header provides the main interface for kernel components.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -42,7 +42,7 @@ typedef struct cpu_info
     char model[64];
 } cpu_info_t;
 
-// Structure système info
+// System info structure
 typedef struct system_info
 {
     char kernel_version[32];
@@ -53,20 +53,20 @@ typedef struct system_info
     cpu_info_t cpus[MAX_CPUS];
 } system_info_t;
 
-// Fonctions principales du noyau
+// Main kernel functions
 void kernel_main(struct orion_boot_info *boot_info);
 void kernel_late_init(void);
 
-// Gestion de la mémoire
+// Memory management
 void mm_init(void);
 void *kmalloc(uint64_t size);
 void kfree(void *ptr);
 
-// Planificateur
+// Scheduler
 void sched_yield(void);
 void scheduler_init(void);
 
-// Initialisation des sous-systèmes
+// Subsystem initialization
 void arch_interrupt_init(void);
 void arch_timer_init(void);
 void ipc_init(void);
@@ -75,18 +75,18 @@ void capabilities_init(void);
 void security_init(void);
 void arch_disable_interrupts(void);
 
-// Gestion des interruptions
+// Interrupt management
 void irq_init(void);
 void irq_enable(void);
 void irq_disable(void);
 
-// Console pour debugging
+// Console for debugging
 void console_init(void);
 void console_putchar(char c);
 void console_puts(const char *str);
 int kprintf(const char *fmt, ...);
 
-// Fonctions assembleur pour MSVC
+// Assembly functions for MSVC
 #ifdef _MSC_VER
 void cli(void);
 void hlt(void);
@@ -97,8 +97,8 @@ static inline void hlt(void) { __asm__ volatile("hlt"); }
 
 // Note: read_cr3 is declared in mm.h and implemented in arch/x86_64/cpu.c
 
-// Panic et gestion d'erreurs
-// panic() déclaré dans types.h
+// Panic and error handling
+// panic() declared in types.h
 NORETURN void kernel_halt(void);
 void kernel_panic(const char *message);
 
@@ -108,7 +108,7 @@ int orion_boot_init(const struct orion_boot_info *boot_info);
 int orion_boot_validate(const struct orion_boot_info *boot_info);
 void orion_boot_debug_print(const struct orion_boot_info *boot_info);
 
-// Macros de debugging
+// Debugging macros
 #define KLOG_EMERGENCY 0
 #define KLOG_ALERT 1
 #define KLOG_CRITICAL 2

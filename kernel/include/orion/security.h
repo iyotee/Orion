@@ -4,7 +4,7 @@
  * Advanced security framework with capability-based access control,
  * hardware security features, and real-time threat detection.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -115,7 +115,7 @@ void security_get_stats(uint64_t *capabilities_active, uint64_t *violations_tota
 
 // Random number generation
 uint64_t arch_get_rdtsc(void); // Read timestamp counter
-// arch_get_timestamp déclaré dans scheduler.h
+// arch_get_timestamp declared in scheduler.h
 
 // Hardware security features
 void arch_enable_smep(void); // Enable SMEP if available

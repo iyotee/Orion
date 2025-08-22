@@ -2,7 +2,7 @@
 name = "orion-block-drivers"
 version = "1.0.0"
 edition = "2021"
-authors = ["Jérémy Noverraz <jeremy@orion-os.dev>"]
+authors = ["Jeremy Noverraz <jeremy@orion-os.dev>"]
 description = "Block storage device drivers for Orion OS"
 license = "MIT"
 keywords = ["orion", "driver", "block", "storage", "virtio"]

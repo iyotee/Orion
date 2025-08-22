@@ -4,12 +4,15 @@
  * Safe abstractions for memory-mapped I/O operations in userland drivers.
  * Provides controlled access to device registers and memory.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
  * License: MIT
  */
+
+// Allow unsafe code in this module as it's necessary for MMIO operations
+#![allow(unsafe_code)]
 
 use crate::{DriverError, DriverResult};
 use core::marker::PhantomData;
@@ -30,6 +33,7 @@ pub struct MmioRegion {
 
 /// MMIO access permissions
 bitflags::bitflags! {
+    #[derive(Debug, Clone, Copy)]
     pub struct MmioPermissions: u32 {
         /// Read access
         const READ = 1 << 0;
@@ -76,7 +80,7 @@ impl MmioAccessor {
         Self {
             base_addr: region.virt_addr,
             size: region.size,
-            permissions: region.permissions,
+            permissions: region.permissions.clone(),
         }
     }
     
@@ -222,8 +226,19 @@ impl MmioAccessor {
     
     /// Memory barrier (ensure all previous MMIO operations complete)
     pub fn memory_barrier(&self) {
-        // TODO: Use architecture-specific memory barrier
-        core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst);
+        // Use architecture-specific memory barrier
+        // For x86_64, we use mfence instruction
+        // For other architectures, fall back to atomic fence
+        
+        #[cfg(target_arch = "x86_64")]
+        unsafe {
+            core::arch::asm!("mfence");
+        }
+        
+        #[cfg(not(target_arch = "x86_64"))]
+        {
+            core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst);
+        }
     }
     
     /// Get base address
@@ -238,7 +253,7 @@ impl MmioAccessor {
     
     /// Get permissions
     pub fn permissions(&self) -> MmioPermissions {
-        self.permissions
+        self.permissions.clone()
     }
 }
 

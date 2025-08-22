@@ -4,7 +4,7 @@
  * Universal framebuffer driver supporting linear framebuffers from UEFI GOP,
  * VBE, and other sources. Provides basic 2D graphics operations.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -101,7 +101,7 @@ impl OrionDriver for FramebufferDriver {
         DriverInfo {
             name: "Generic Framebuffer Driver",
             version: "1.0.0",
-            author: "Jérémy Noverraz",
+            author: "Jeremy Noverraz",
             description: "Universal framebuffer driver for linear display buffers",
         }
     }

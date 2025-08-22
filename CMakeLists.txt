@@ -1,21 +1,21 @@
 cmake_minimum_required(VERSION 3.20)
 project(Orion LANGUAGES C ASM)
 
-# Configuration générale
+# General Configuration
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-# Support des architectures cibles
-set(ORION_ARCH "x86_64" CACHE STRING "Architecture cible (x86_64 ou aarch64)")
+# Target architecture support
+set(ORION_ARCH "x86_64" CACHE STRING "Target architecture (x86_64 or aarch64)")
 set_property(CACHE ORION_ARCH PROPERTY STRINGS "x86_64" "aarch64")
 
-# Configuration du compilateur (Clang requis)
+# Compiler configuration (Clang required)
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_ASM_COMPILER clang)
 set(CMAKE_LINKER lld)
 
-# Flags de compilation pour le noyau freestanding
+# Compilation flags for freestanding kernel
 set(KERNEL_CFLAGS
     -ffreestanding
     -fno-stack-protector
@@ -37,7 +37,7 @@ set(KERNEL_CFLAGS
     -Wno-unused-parameter
 )
 
-# Flags spécifiques à l'architecture
+# Architecture-specific flags
 if(ORION_ARCH STREQUAL "x86_64")
     list(APPEND KERNEL_CFLAGS
         -target x86_64-unknown-none
@@ -70,20 +70,20 @@ else()
     list(APPEND KERNEL_CFLAGS -O2 -DNDEBUG)
 endif()
 
-# Répertoires d'inclusion
+# Include directories
 include_directories(kernel/include)
 
-# Sous-projets
+# Subprojects
 add_subdirectory(kernel)
 add_subdirectory(tools)
 
-# Cibles principales
+# Main targets
 add_custom_target(all-orion
     DEPENDS kernel
-    COMMENT "Construction complète d'Orion"
+    COMMENT "Complete Orion build"
 )
 
-# Cible pour QEMU x86_64
+# Target for QEMU x86_64
 add_custom_target(qemu-x86_64
     COMMAND qemu-system-x86_64 
         -machine q35
@@ -95,14 +95,14 @@ add_custom_target(qemu-x86_64
         -no-shutdown
         -kernel $<TARGET_FILE:kernel>
     DEPENDS kernel
-    COMMENT "Exécution d'Orion dans QEMU x86_64"
+    COMMENT "Running Orion in QEMU x86_64"
 )
 
-# Cible pour générer l'ISO UEFI
+# Target for generating UEFI ISO
 add_custom_target(iso
     COMMAND ${CMAKE_SOURCE_DIR}/scripts/build-iso.sh $<TARGET_FILE:kernel> ${CMAKE_BINARY_DIR}/orion.iso
     DEPENDS kernel
-    COMMENT "Génération de l'ISO UEFI bootable"
+    COMMENT "Generating bootable UEFI ISO"
 )
 
 # Tests

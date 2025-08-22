@@ -4,7 +4,7 @@
  * Fast system call entry using SYSCALL/SYSRET instructions.
  * Implements the x86_64 System V ABI calling convention.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -42,8 +42,9 @@ syscall_entry:
     /* Save user stack pointer */
     mov %rsp, %rbp
     
-    /* Switch to kernel stack if needed */
-    /* TODO: Implement per-CPU kernel stack */
+    /* Switch to per-CPU kernel stack */
+    mov %gs:0x0, %rsp    /* Load kernel stack from GS segment */
+    mov %rbp, %gs:0x8    /* Save user stack pointer in GS segment */
     
     /* Prepare arguments for C function call */
     /* syscall_handler(uint64_t syscall_num, uint64_t arg0, uint64_t arg1, 

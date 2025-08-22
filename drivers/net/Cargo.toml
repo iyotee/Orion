@@ -2,7 +2,7 @@
 name = "orion-network-drivers"
 version = "1.0.0"
 edition = "2021"
-authors = ["Jérémy Noverraz <jeremy@orion-os.dev>"]
+authors = ["Jeremy Noverraz <jeremy@orion-os.dev>"]
 description = "Network device drivers for Orion OS"
 license = "MIT"
 keywords = ["orion", "driver", "network", "ethernet", "virtio"]

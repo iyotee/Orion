@@ -129,3 +129,9 @@ initramfs.img
 *.pfx
 secrets/
 .env
+
+# VSCode
+.vscode/
+
+# TODO
+TODO.md

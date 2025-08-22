@@ -4,7 +4,7 @@
  * Complete Fair Scheduler (CFS) definitions and interface.
  * This header provides the public API for process and thread management.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -27,7 +27,7 @@ typedef struct vm_space vm_space_t;
 // ENUMS AND CONSTANTS
 // ========================================
 
-// États des processus
+// Process states
 typedef enum
 {
     PROC_STATE_READY,
@@ -40,7 +40,7 @@ typedef enum
     PROC_STATE_TERMINATED
 } process_state_t;
 
-// États des threads
+// Thread states
 typedef enum
 {
     THREAD_STATE_READY,
@@ -50,7 +50,7 @@ typedef enum
     THREAD_STATE_TERMINATED
 } thread_state_t;
 
-// Types de handles
+// Handle types
 typedef enum
 {
     HANDLE_TYPE_NONE = 0,
@@ -67,7 +67,7 @@ typedef enum
 // STRUCTURE DEFINITIONS
 // ========================================
 
-// Structure handle
+// Handle structure
 typedef struct
 {
     handle_type_t type;
@@ -79,7 +79,7 @@ typedef struct
 // Maximum number of CPUs
 #define MAX_CPUS 64
 
-// Structure thread complète
+// Complete thread structure
 typedef struct thread
 {
     uint64_t tid;              // Thread ID
@@ -118,7 +118,7 @@ typedef struct thread
     uint64_t cpu_affinity; // CPU affinity (bitmap)
 } thread_t;
 
-// Structure processus complète
+// Complete process structure
 typedef struct process
 {
     uint64_t pid;          // Process ID
@@ -183,44 +183,44 @@ typedef struct cpu_runqueue
 // SCHEDULER API
 // ========================================
 
-// Initialisation
+// Initialization
 void scheduler_init(void);
 
-// Gestion des processus
+// Process management
 process_t *scheduler_create_process(void);
 void scheduler_destroy_process(process_t *process);
 void scheduler_add_process(process_t *process);
 process_t *scheduler_find_process(uint64_t pid);
 process_t *scheduler_get_current_process(void);
 
-// Gestion des threads
+// Thread management
 thread_t *scheduler_create_thread(process_t *process, uint64_t entry_point, uint64_t stack_pointer, uint64_t arg);
 thread_t *scheduler_get_current_thread(void);
 
-// Contrôle du scheduling
+// Scheduling control
 void sched_yield(void);
 void scheduler_block_current_process(void);
 void scheduler_wakeup_process(process_t *process);
 void scheduler_sleep_ns(uint64_t nanoseconds);
 
-// Statistiques
+// Statistics
 uint64_t scheduler_get_process_count(void);
 uint64_t scheduler_get_thread_count(void);
 
-// Utilitaires
+// Utilities
 void handle_cleanup(handle_t *handle);
 int elf_load_process(process_t *process, const char *path);
 int process_setup_args(process_t *process, char *const argv[], char *const envp[]);
 int signal_send(process_t *target, uint32_t signal);
 
-// Compatibilité
+// Compatibility
 void thread_exit(int exit_code);
 
 // ========================================
 // ARCHITECTURE-SPECIFIC FUNCTIONS
 // ========================================
 
-// Ces fonctions doivent être implémentées par l'architecture
+// These functions must be implemented by the architecture
 uint32_t arch_get_current_cpu(void);
 uint32_t arch_get_cpu_count(void);
 uint64_t arch_get_timestamp(void);

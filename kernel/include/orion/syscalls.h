@@ -3,73 +3,73 @@
 
 #include <orion/types.h>
 
-// Numéros d'appels système Orion (< 60 total pour v1.0)
+// Orion system call numbers (< 60 total for v1.0)
 
-// Catégorie: Process/Thread (0-9)
-#define SYS_EXIT 0          // Terminer processus
-#define SYS_YIELD 1         // Céder CPU
-#define SYS_PROC_CREATE 2   // Créer processus
-#define SYS_THREAD_CREATE 3 // Créer thread
-#define SYS_WAIT 4          // Attendre processus/thread
-#define SYS_SIGNAL 5        // Envoyer signal
-#define SYS_GETPID 6        // Obtenir PID
-#define SYS_GETTID 7        // Obtenir TID
+// Category: Process/Thread (0-9)
+#define SYS_EXIT 0          // Terminate process
+#define SYS_YIELD 1         // Yield CPU
+#define SYS_PROC_CREATE 2   // Create process
+#define SYS_THREAD_CREATE 3 // Create thread
+#define SYS_WAIT 4          // Wait for process/thread
+#define SYS_SIGNAL 5        // Send signal
+#define SYS_GETPID 6        // Get PID
+#define SYS_GETTID 7        // Get TID
 
-// Catégorie: Mémoire (10-19)
-#define SYS_VM_MAP 10     // Mapper mémoire virtuelle
-#define SYS_VM_UNMAP 11   // Démapper mémoire
-#define SYS_VM_PROTECT 12 // Changer permissions
-#define SYS_SHM_CREATE 13 // Créer mémoire partagée
-#define SYS_SHM_ATTACH 14 // Attacher mémoire partagée
-#define SYS_SHM_DETACH 15 // Détacher mémoire partagée
-#define SYS_MADVISE 16    // Conseils mémoire
+// Category: Memory (10-19)
+#define SYS_VM_MAP 10     // Map virtual memory
+#define SYS_VM_UNMAP 11   // Unmap memory
+#define SYS_VM_PROTECT 12 // Change permissions
+#define SYS_SHM_CREATE 13 // Create shared memory
+#define SYS_SHM_ATTACH 14 // Attach shared memory
+#define SYS_SHM_DETACH 15 // Detach shared memory
+#define SYS_MADVISE 16    // Memory advice
 
-// Catégorie: IPC (20-29)
-#define SYS_PORT_CREATE 20 // Créer port IPC
-#define SYS_PORT_SEND 21   // Envoyer message
-#define SYS_PORT_RECV 22   // Recevoir message
-#define SYS_PORT_SHARE 23  // Partager port
-#define SYS_MSG_FORWARD 24 // Transférer message
+// Category: IPC (20-29)
+#define SYS_PORT_CREATE 20 // Create IPC port
+#define SYS_PORT_SEND 21   // Send message
+#define SYS_PORT_RECV 22   // Receive message
+#define SYS_PORT_SHARE 23  // Share port
+#define SYS_MSG_FORWARD 24 // Forward message
 
-// Catégorie: Temps (30-34)
-#define SYS_CLOCK_GET 30    // Lire horloge
-#define SYS_TIMER_CREATE 31 // Créer timer
-#define SYS_TIMER_START 32  // Démarrer timer
-#define SYS_TIMER_STOP 33   // Arrêter timer
-#define SYS_NANOSLEEP 34    // Dormir
+// Category: Time (30-34)
+#define SYS_CLOCK_GET 30    // Read clock
+#define SYS_TIMER_CREATE 31 // Create timer
+#define SYS_TIMER_START 32  // Start timer
+#define SYS_TIMER_STOP 33   // Stop timer
+#define SYS_NANOSLEEP 34    // Sleep
 
-// Catégorie: I/O abstraite (35-39)
-#define SYS_OPEN 35      // Ouvrir fichier
-#define SYS_IO_SUBMIT 36 // Soumettre I/O
-#define SYS_IO_POLL 37   // Polling I/O
-#define SYS_IO_CANCEL 38 // Annuler I/O
+// Category: Abstract I/O (35-39)
+#define SYS_OPEN 35      // Open file
+#define SYS_IO_SUBMIT 36 // Submit I/O
+#define SYS_IO_POLL 37   // Poll I/O
+#define SYS_IO_CANCEL 38 // Cancel I/O
 
-// Catégorie: Objets (40-44)
-#define SYS_OBJ_INFO 40  // Info sur objet
-#define SYS_OBJ_DUP 41   // Dupliquer handle
-#define SYS_OBJ_CLOSE 42 // Fermer handle
+// Category: Objects (40-44)
+#define SYS_OBJ_INFO 40  // Object info
+#define SYS_OBJ_DUP 41   // Duplicate handle
+#define SYS_OBJ_CLOSE 42 // Close handle
 
-// Catégorie: Sécurité (45-49)
-#define SYS_CAP_GRANT 45    // Accorder capability
-#define SYS_CAP_REVOKE 46   // Révoquer capability
-#define SYS_CAP_QUERY 47    // Vérifier capability
-#define SYS_SANDBOX_LOAD 48 // Charger sandbox
-#define SYS_AUDIT_EMIT 49   // Émettre audit
+// Category: Security (45-49)
+#define SYS_CAP_GRANT 45    // Grant capability
+#define SYS_CAP_REVOKE 46   // Revoke capability
+#define SYS_CAP_QUERY 47    // Check capability
+#define SYS_SANDBOX_LOAD 48 // Load sandbox
+#define SYS_AUDIT_EMIT 49   // Emit audit
 
-// Catégorie: Divers (50-59)
-#define SYS_INFO 50      // Info système
+// Category: Miscellaneous (50-59)
+#define SYS_INFO 50      // System info
 #define SYS_DBG_TRACE 51 // Debug trace
-#define SYS_RANDOM 52    // Obtenir entropy
+#define SYS_RANDOM 52    // Get entropy
 
-// Nombre maximum de syscalls
+// Maximum number of system calls
 #define MAX_SYSCALLS 60
 
-// Structures pour les appels système
+// Structures for system calls
 
-// Structures définies dans types.h
+// Structures defined in types.h
 // or_system_info_t, or_vm_map_t, or_msg_send_t, or_msg_recv_t
 
-// Flags pour vm_map
+// Flags for vm_map
 #define VM_PROT_READ (1 << 0)
 #define VM_PROT_WRITE (1 << 1)
 #define VM_PROT_EXEC (1 << 2)
@@ -79,14 +79,14 @@
 #define VM_MAP_FIXED (1 << 2)
 #define VM_MAP_ANONYMOUS (1 << 3)
 
-// Convention d'appel System V x86_64:
-// RDI, RSI, RDX, RCX, R8, R9 pour les 6 premiers arguments
-// RAX = numéro syscall
-// Retour dans RAX (int64_t)
+// System V x86_64 calling convention:
+// RDI, RSI, RDX, RCX, R8, R9 for first 6 arguments
+// RAX = system call number
+// Return in RAX (int64_t)
 
-// Wrapper pour appels depuis le code C (userland)
+// Wrapper for calls from C code (userland)
 #ifdef _MSC_VER
-// Pour MSVC, on utilise des stubs temporaires (sera remplacé par assembleur dédié)
+// For MSVC, we use temporary stubs (will be replaced by dedicated assembly)
 static inline int64_t orion_syscall0(uint64_t num)
 {
     (void)num;
@@ -159,12 +159,12 @@ static inline int64_t orion_syscall3(uint64_t num, uint64_t arg1, uint64_t arg2,
 }
 #endif
 
-// Fonctions C pour utilisation dans le noyau
+// Functions for use in the kernel
 void syscalls_init(void);
 int64_t syscall_handler(uint64_t syscall_num, uint64_t arg1, uint64_t arg2,
                         uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6);
 
-// Handlers individuels (définis dans syscalls.c)
+// Individual handlers (defined in syscalls.c)
 int64_t sys_info_impl(or_system_info_t *info);
 int64_t sys_exit_impl(int exit_code);
 int64_t sys_yield_impl(void);

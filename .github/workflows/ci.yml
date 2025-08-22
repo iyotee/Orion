@@ -13,11 +13,28 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  # Job principal de build et test
+  # Main build and test job
   build-and-test:
-    uses: ./.github/workflows/build-test.yml
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang \
+          lld \
+          cmake \
+          ninja-build
+    
+    - name: Build and Test
+      run: |
+        cmake -B build -GNinja
+        cmake --build build --target all
+        cmake --build build --target test
 
-  # Fuzzing (uniquement nightly et sur main)
+  # Fuzzing (nightly only and on main)
   fuzz:
     name: Fuzzing
     runs-on: ubuntu-latest
@@ -33,22 +50,22 @@ jobs:
     
     - name: Setup Fuzzing Environment
       run: |
-        # TODO: Configurer environment fuzzing
+        # TODO: Configure fuzzing environment
         echo "Fuzzing setup needed"
     
     - name: Run Fuzz Campaign (Short)
       timeout-minutes: 30
       run: |
-        # TODO: Lancer fuzzing court pour CI
+        # TODO: Launch short fuzzing for CI
         echo "Short fuzz campaign would run here"
     
     - name: Collect Fuzz Results
       if: always()
       run: |
-        # TODO: Collecter résultats fuzzing
+        # TODO: Collect fuzzing results
         echo "Fuzz results collection needed"
 
-  # Benchmarks de performance
+  # Performance benchmarks
   benchmarks:
     name: Performance Benchmarks
     runs-on: ubuntu-latest
@@ -59,12 +76,12 @@ jobs:
     
     - name: Build Benchmark Suite
       run: |
-        # TODO: Build des benchmarks
+        # TODO: Build benchmarks
         echo "Benchmark build needed"
     
     - name: Run KPI Benchmarks
       run: |
-        # TODO: Exécuter benchmarks KPI vs Linux
+        # TODO: Execute KPI benchmarks vs Linux
         echo "KPI benchmarks would run here"
         echo "Target: syscall latency < 150ns"
         echo "Target: context switch < 250ns"
@@ -77,7 +94,7 @@ jobs:
         name: benchmark-results
         path: bench/results/
 
-  # Build de release
+  # Release build
   release-build:
     name: Release Build
     runs-on: ubuntu-latest
@@ -108,7 +125,7 @@ jobs:
     
     - name: Build ISO Image
       run: |
-        # TODO: Script de création ISO UEFI
+        # TODO: UEFI ISO creation script
         echo "ISO creation needed"
         # ./scripts/build-iso.sh build-release/orion-kernel.elf orion-v${{ github.ref_name }}.iso
     

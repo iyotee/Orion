@@ -1,9 +1,9 @@
-// Physical Memory Manager (PMM) pour Orion
+// Physical Memory Manager (PMM) for Orion
 #include <orion/types.h>
 #include <orion/mm.h>
 #include <orion/kernel.h>
 
-// Bitmap pour les pages physiques (pour 4GB = 1M pages = 128KB bitmap)
+// Bitmap for physical pages (for 4GB = 1M pages = 128KB bitmap)
 #define MAX_PAGES       (1024 * 1024)  // 4GB / 4KB
 #define BITMAP_SIZE     (MAX_PAGES / 8)
 
@@ -13,7 +13,7 @@ static uint64_t free_pages = 0;
 static uint64_t first_free_page = 0;
 static bool pmm_initialized = false;
 
-// Marquer une page comme utilisée
+// Mark a page as used
 static void set_page_used(uint64_t page_num) {
     if (page_num >= MAX_PAGES) return;
     
@@ -26,7 +26,7 @@ static void set_page_used(uint64_t page_num) {
     }
 }
 
-// Marquer une page comme libre
+// Mark a page as free
 static void set_page_free(uint64_t page_num) {
     if (page_num >= MAX_PAGES) return;
     
@@ -43,7 +43,7 @@ static void set_page_free(uint64_t page_num) {
     }
 }
 
-// Vérifier si une page est libre
+// Check if a page is free
 static bool is_page_free(uint64_t page_num) {
     if (page_num >= MAX_PAGES) return false;
     
@@ -53,23 +53,23 @@ static bool is_page_free(uint64_t page_num) {
     return !(page_bitmap[byte_index] & (1 << bit_index));
 }
 
-// Initialiser le PMM avec une configuration basique
+    // Initialize PMM with basic configuration
 void pmm_init(void) {
     kinfo("Initializing Physical Memory Manager");
     
-    // Marquer toutes les pages comme libres initialement
+    // Mark all pages as free initially
     for (size_t i = 0; i < BITMAP_SIZE; i++) {
         page_bitmap[i] = 0;
     }
     
-    // Configuration simplifiée : supposer 512MB de RAM utilisable
-    // Pages 0-255 (1MB) : réservées pour boot/noyau
-    // Pages 256-131071 (512MB-1MB) : libres
+    // Simplified configuration: assume 512MB usable RAM
+    // Pages 0-255 (1MB): reserved for boot/kernel
+    // Pages 256-131071 (512MB-1MB): free
     total_pages = 131072; // 512MB / 4KB
     free_pages = total_pages - 256;
     first_free_page = 256;
     
-    // Marquer les premières pages comme utilisées (boot + noyau)
+    // Mark first pages as used (boot + kernel)
     for (uint64_t i = 0; i < 256; i++) {
         set_page_used(i);
     }
@@ -85,18 +85,18 @@ void pmm_init(void) {
           (unsigned long long)(free_pages * PAGE_SIZE / 1024 / 1024));
 }
 
-// Allouer une page physique
+// Allocate a physical page
 uint64_t pmm_alloc_page(void) {
     if (!pmm_initialized || free_pages == 0) {
-        return 0; // Pas de pages libres
+        return 0; // No free pages
     }
     
-    // Chercher la première page libre
+    // Find first free page
     for (uint64_t page = first_free_page; page < total_pages; page++) {
         if (is_page_free(page)) {
             set_page_used(page);
             
-            // Mettre à jour first_free_page
+            // Update first_free_page
             if (page == first_free_page) {
                 while (first_free_page < total_pages && !is_page_free(first_free_page)) {
                     first_free_page++;
@@ -107,7 +107,7 @@ uint64_t pmm_alloc_page(void) {
                    (unsigned long long)page,
                    (void*)(page * PAGE_SIZE));
             
-            return page * PAGE_SIZE; // Retourner adresse physique
+            return page * PAGE_SIZE; // Return physical address
         }
     }
     
@@ -115,7 +115,7 @@ uint64_t pmm_alloc_page(void) {
     return 0;
 }
 
-// Libérer une page physique
+// Free a physical page
 void pmm_free_page(uint64_t phys_addr) {
     if (!pmm_initialized) {
         return;
@@ -143,7 +143,7 @@ void pmm_free_page(uint64_t phys_addr) {
            (unsigned long long)page_num, (void*)phys_addr);
 }
 
-// Allouer plusieurs pages contiguës
+// Allocate multiple contiguous pages
 uint64_t pmm_alloc_pages(size_t count) {
     if (!pmm_initialized || count == 0) {
         return 0;
@@ -153,11 +153,11 @@ uint64_t pmm_alloc_pages(size_t count) {
         return pmm_alloc_page();
     }
     
-    // Chercher 'count' pages contiguës libres
+    // Find 'count' contiguous free pages
     for (uint64_t start_page = first_free_page; start_page + count <= total_pages; start_page++) {
         bool all_free = true;
         
-        // Vérifier si toutes les pages sont libres
+        // Check if all pages are free
         for (size_t i = 0; i < count; i++) {
             if (!is_page_free(start_page + i)) {
                 all_free = false;
@@ -166,7 +166,7 @@ uint64_t pmm_alloc_pages(size_t count) {
         }
         
         if (all_free) {
-            // Allouer toutes les pages
+            // Allocate all pages
             for (size_t i = 0; i < count; i++) {
                 set_page_used(start_page + i);
             }
@@ -182,7 +182,7 @@ uint64_t pmm_alloc_pages(size_t count) {
     return 0;
 }
 
-// Libérer plusieurs pages contiguës
+// Free multiple contiguous pages
 void pmm_free_pages(uint64_t phys_addr, size_t count) {
     if (!pmm_initialized || count == 0) {
         return;
@@ -193,7 +193,7 @@ void pmm_free_pages(uint64_t phys_addr, size_t count) {
     }
 }
 
-// Obtenir statistiques mémoire
+// Get memory statistics
 void pmm_get_stats(uint64_t* total, uint64_t* free, uint64_t* used) {
     if (total) *total = total_pages;
     if (free) *free = free_pages;

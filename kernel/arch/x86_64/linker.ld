@@ -1,36 +1,36 @@
-/* Script de linkage simple pour Orion x86_64 */
+/* Simple linker script for Orion x86_64 */
 OUTPUT_FORMAT("elf64-x86-64")
 OUTPUT_ARCH(i386:x86-64)
 ENTRY(kernel_start)
 
 SECTIONS {
-    /* Code du noyau */
+    /* Kernel code */
     .text : {
         *(.boot)
         *(.text)
         *(.text.*)
     }
     
-    /* Données en lecture seule */
+    /* Read-only data */
     .rodata : {
         *(.rodata)
         *(.rodata.*)
     }
     
-    /* Données initialisées */
+    /* Initialized data */
     .data : {
         *(.data)
         *(.data.*)
     }
     
-    /* Données non-initialisées */
+    /* Uninitialized data */
     .bss : {
         *(.bss)
         *(.bss.*)
         *(COMMON)
     }
     
-    /* Éliminer les sections non nécessaires */
+    /* Remove unnecessary sections */
     /DISCARD/ : {
         *(.note*)
         *(.comment)

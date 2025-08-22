@@ -1,10 +1,10 @@
-# Construction du noyau Orion
+# Orion Kernel Build
 set(KERNEL_SOURCES
-    # Point d'entrée et fichiers assembleur
+    # Entry point and assembly files
     arch/${ORION_ARCH}/boot.S
     arch/${ORION_ARCH}/arch_asm.S
     
-    # Fichiers C de l'architecture
+    # Architecture C files
     arch/${ORION_ARCH}/entry.c
     arch/${ORION_ARCH}/cpu.c
     arch/${ORION_ARCH}/mmu.c
@@ -15,7 +15,7 @@ set(KERNEL_SOURCES
     arch/${ORION_ARCH}/msvc_stubs.c
     arch/${ORION_ARCH}/stubs.c
     
-    # Cœur du noyau
+    # Kernel core
     core/main.c
     core/boot.c
     core/scheduler.c
@@ -25,21 +25,21 @@ set(KERNEL_SOURCES
     core/panic.c
     core/shell.c
     
-    # Gestion mémoire
+    # Memory management
     mm/pmm.c
     mm/vmm.c
     mm/slab.c
     mm/heap.c
     
-    # Système de fichiers
+    # File system
     fs/vfs.c
     fs/ramfs.c
     
-    # Bibliothèques
+    # Libraries
     lib/string.c
 )
 
-# Headers du noyau
+# Kernel headers
 set(KERNEL_HEADERS
     include/orion/types.h
     include/orion/kernel.h
@@ -53,43 +53,43 @@ set(KERNEL_HEADERS
     arch/${ORION_ARCH}/include/arch.h
 )
 
-# Création de l'exécutable noyau
+# Create kernel executable
 add_executable(kernel ${KERNEL_SOURCES} ${KERNEL_HEADERS})
 
-# Include directories pour les headers
+# Include directories for headers
 target_include_directories(kernel PRIVATE 
     include
     arch/${ORION_ARCH}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
 )
 
-# Configuration de la compilation assembleur
+# Assembly compilation configuration
 enable_language(ASM)
 
-# Définir que nous sommes dans le contexte kernel
+# Define that we are in kernel context
 target_compile_definitions(kernel PRIVATE ORION_KERNEL_BUILD=1)
 
-# Application des flags de compilation selon le compilateur
+# Apply compilation flags based on compiler
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(kernel PRIVATE ${KERNEL_CFLAGS})
     target_link_options(kernel PRIVATE ${KERNEL_LDFLAGS})
     
-    # Flags spécifiques pour l'assembleur
+    # Specific flags for assembler
     set_source_files_properties(arch/${ORION_ARCH}/boot.S PROPERTIES COMPILE_FLAGS "-fPIC" LANGUAGE ASM)
     set_source_files_properties(arch/${ORION_ARCH}/arch_asm.S PROPERTIES COMPILE_FLAGS "-fPIC" LANGUAGE ASM)
 else()
-    # MSVC flags pour Windows
+    # MSVC flags for Windows
     target_compile_options(kernel PRIVATE /W3 /WX- /Od /Zi)
     target_compile_definitions(kernel PRIVATE DEBUG _CRT_SECURE_NO_WARNINGS)
 endif()
 
-# Script de linkage spécifique à l'architecture (uniquement pour GCC/Clang)
+# Architecture-specific linker script (GCC/Clang only)
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/arch/${ORION_ARCH}/linker.ld")
     target_link_options(kernel PRIVATE -T ${LINKER_SCRIPT} -no-pie -nostdlib -nostartfiles)
 endif()
 
-# Propriétés de l'exécutable
+# Executable properties
 set_target_properties(kernel PROPERTIES
     OUTPUT_NAME "orion-kernel"
     SUFFIX ".elf"

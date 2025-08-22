@@ -101,7 +101,7 @@ jobs:
         sleep 10
         kill $QEMU_PID || true
         
-        # Vérifier que le noyau a booté
+        # Verify that the kernel has booted
         if grep -q "ORION KERNEL" boot.log; then
           echo "✓ Kernel boot successful"
         else
@@ -153,7 +153,7 @@ jobs:
     
     - name: Generate Coverage Report
       run: |
-        # TODO: Implémenter collecte de couverture avec kcov
+        # TODO: Implement coverage collection with kcov
         echo "Coverage collection not implemented yet"
     
   lint:
@@ -181,7 +181,7 @@ jobs:
     
     - name: Run Clang-Tidy
       run: |
-        # TODO: Configuration clang-tidy pour noyau
+        # TODO: Clang-tidy configuration for kernel
         echo "Clang-tidy configuration needed"
     
     - name: Check Rust Format
@@ -219,11 +219,11 @@ jobs:
     
     - name: Check for Unsafe Code
       run: |
-        # Compter les blocs unsafe
+        # Count unsafe blocks
         UNSAFE_COUNT=$(find . -name "*.rs" -exec grep -l "unsafe" {} \; | wc -l)
         echo "Found $UNSAFE_COUNT files with unsafe code"
         
-        # TODO: Implémenter vérification des justifications unsafe
+        # TODO: Implement unsafe justification verification
         if [ $UNSAFE_COUNT -gt 10 ]; then
           echo "⚠️  Too many unsafe blocks, review needed"
         fi

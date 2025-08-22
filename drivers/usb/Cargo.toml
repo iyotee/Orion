@@ -2,7 +2,7 @@
 name = "orion-usb-drivers"
 version = "1.0.0"
 edition = "2021"
-authors = ["Jérémy Noverraz <jeremy@orion-os.dev>"]
+authors = ["Jeremy Noverraz <jeremy@orion-os.dev>"]
 description = "USB device drivers for Orion OS"
 license = "MIT"
 keywords = ["orion", "driver", "usb", "hid", "storage"]

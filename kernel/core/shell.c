@@ -12,7 +12,7 @@
 #include <orion/kernel.h>
 #include <orion/mm.h>
 #include <orion/syscalls.h>
-// Ne pas inclure string.h système - utiliser nos propres fonctions
+// Don't include system string.h - use our own functions
 
 // Simple strchr implementation for kernel
 static char *strchr(const char *s, int c) {
@@ -61,7 +61,7 @@ static char *shell_strtok(char *str, const char *delim) {
 
 // va_* macros for freestanding environment
 typedef char* va_list;
-// Macros va_* définies dans types.h
+// va_* macros defined in types.h
 
 // ====================================
 // COMMAND FUNCTION STUBS

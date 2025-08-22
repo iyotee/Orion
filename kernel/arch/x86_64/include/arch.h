@@ -5,7 +5,7 @@
  * for x86_64 processors. Includes register structures, CPU features,
  * and low-level hardware access functions.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -19,7 +19,7 @@
 
 // x86_64 architecture-specific definitions
 
-// Registres CPU complets
+// Complete CPU registers
 typedef struct
 {
     uint64_t rax, rbx, rcx, rdx;
@@ -28,7 +28,7 @@ typedef struct
     uint64_t rip, rflags;
 } cpu_regs_t;
 
-// Registres pour interruptions
+// Registers for interrupts
 typedef struct
 {
     uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
@@ -37,26 +37,26 @@ typedef struct
     uint64_t rip, cs, rflags, rsp, ss;
 } registers_t;
 
-// Structure IDT entry
+// IDT entry structure
 typedef struct
 {
     uint16_t offset_low;  // Offset bits 0-15
     uint16_t selector;    // Code segment selector
     uint8_t ist;          // Interrupt stack table
-    uint8_t type_attr;    // Type et attributs
+    uint8_t type_attr;    // Type and attributes
     uint16_t offset_mid;  // Offset bits 16-31
     uint32_t offset_high; // Offset bits 32-63
-    uint32_t zero;        // Réservé
+    uint32_t zero;        // Reserved
 } PACKED idt_entry_t;
 
-// Structure IDTR
+// IDTR structure
 typedef struct
 {
     uint16_t limit;
     uint64_t base;
 } PACKED idtr_t;
 
-// Constants CR4
+// CR4 Constants
 #define CR4_SMEP (1ULL << 20) // Supervisor Mode Execution Prevention
 #define CR4_SMAP (1ULL << 21) // Supervisor Mode Access Prevention
 #define CR4_UMIP (1ULL << 11) // User Mode Instruction Prevention
@@ -101,12 +101,12 @@ void arch_enable_umip(void);
 bool arch_validate_user_address(uint64_t vaddr, size_t size, bool write);
 
 // Virtual address conversion (defined in types.h but used here)
-// PHYS_TO_VIRT défini dans types.h
+// PHYS_TO_VIRT defined in types.h
 #define VIRT_TO_PHYS(vaddr) ((uint64_t)(vaddr) - 0xFFFF800000000000ULL)
 
-// Fonctions assembleur avec stubs MSVC
+// Assembly functions with MSVC stubs
 #ifdef _MSC_VER
-// Stubs MSVC - seront remplacés par assembleur
+// MSVC stubs - will be replaced by assembly
 static inline void cpuid(uint32_t leaf, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx)
 {
     (void)leaf;
@@ -138,7 +138,7 @@ static inline void __builtin_outb(uint16_t port, uint8_t data)
 static inline void idt_load(idtr_t *idtr) { (void)idtr; }
 static inline void sti(void) { /* MSVC stub */ }
 #else
-// Vraies fonctions assembleur GCC/Clang
+// Real assembly functions GCC/Clang
 static inline void cpuid(uint32_t leaf, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx)
 {
     __asm__ volatile("cpuid" : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx) : "a"(leaf));
@@ -183,7 +183,7 @@ static inline uint8_t inb(uint16_t port)
     return __builtin_inb(port);
 }
 
-// Console série
+// Serial console
 void serial_init(void);
 void serial_putchar(char c);
 

@@ -1,15 +1,15 @@
-// Heap allocator pour Orion - malloc/free du noyau
+// Heap allocator for Orion - kernel malloc/free
 #include <orion/types.h>
 #include <orion/mm.h>
 #include <orion/kernel.h>
 
-// Taille minimum d'allocation
+// Minimum allocation size
 #define MIN_ALLOC_SIZE  16
 #define HEAP_MAGIC      0xDEADBEEF
 
-// Structure heap_block_t définie dans mm.h
+// heap_block_t structure defined in mm.h
 
-// Zone de heap statique pour le noyau (1MB)
+// Static heap zone for kernel (1MB)
 #define KERNEL_HEAP_SIZE (1024 * 1024)
 #ifdef _MSC_VER
 __declspec(align(16)) static char kernel_heap_memory[KERNEL_HEAP_SIZE];
@@ -19,17 +19,17 @@ static char kernel_heap_memory[KERNEL_HEAP_SIZE] __attribute__((aligned(16)));
 static heap_block_t* heap_start = NULL;
 static bool heap_initialized = false;
 
-// Statistiques du heap
+// Heap statistics
 static size_t total_allocated = 0;
 static size_t peak_allocated = 0;
 static size_t num_allocations = 0;
 static size_t num_frees = 0;
 
-// Initialiser le heap
+// Initialize the heap
 void heap_init(void) {
     kinfo("Initializing kernel heap");
     
-    // Initialiser le premier bloc (tout l'espace libre)
+    // Initialize the first block (all free space)
     heap_start = (heap_block_t*)kernel_heap_memory;
     heap_start->magic = HEAP_MAGIC;
     heap_start->size = KERNEL_HEAP_SIZE - sizeof(heap_block_t);
@@ -44,7 +44,7 @@ void heap_init(void) {
     kinfo("  Available: %llu bytes", (unsigned long long)heap_start->size);
 }
 
-// Vérifier la validité d'un bloc
+// Validate a block
 static bool validate_block(heap_block_t* block) {
     if (!block) return false;
     if (block->magic != HEAP_MAGIC) {
@@ -54,13 +54,13 @@ static bool validate_block(heap_block_t* block) {
     return true;
 }
 
-// Fusionner les blocs libres adjacents
+// Merge adjacent free blocks
 static void coalesce_free_blocks(heap_block_t* block) {
     if (!validate_block(block) || !block->is_free) {
         return;
     }
     
-    // Fusionner avec le bloc suivant s'il est libre
+    // Merge with next block if it's free
     if (block->next && block->next->is_free) {
         char* block_end = (char*)block + sizeof(heap_block_t) + block->size;
         if (block_end == (char*)block->next) {
@@ -72,7 +72,7 @@ static void coalesce_free_blocks(heap_block_t* block) {
         }
     }
     
-    // Fusionner avec le bloc précédent s'il est libre
+    // Merge with previous block if it's free
     if (block->prev && block->prev->is_free) {
         char* prev_end = (char*)block->prev + sizeof(heap_block_t) + block->prev->size;
         if (prev_end == (char*)block) {
@@ -85,7 +85,7 @@ static void coalesce_free_blocks(heap_block_t* block) {
     }
 }
 
-// Diviser un bloc libre si nécessaire
+// Split a free block if necessary
 static heap_block_t* split_block(heap_block_t* block, size_t size) {
     if (!validate_block(block) || !block->is_free) {
         return NULL;
@@ -93,12 +93,12 @@ static heap_block_t* split_block(heap_block_t* block, size_t size) {
     
     size_t remaining = block->size - size;
     
-    // Si le reste est trop petit pour un bloc, ne pas diviser
+    // If the remainder is too small for a block, don't split
     if (remaining < sizeof(heap_block_t) + MIN_ALLOC_SIZE) {
         return block;
     }
     
-    // Créer un nouveau bloc avec le reste
+    // Create a new block with the remainder
     char* new_block_ptr = (char*)block + sizeof(heap_block_t) + size;
     heap_block_t* new_block = (heap_block_t*)new_block_ptr;
     
@@ -118,21 +118,21 @@ static heap_block_t* split_block(heap_block_t* block, size_t size) {
     return block;
 }
 
-// Allocation mémoire noyau
+// Kernel memory allocation
 void* kmalloc(size_t size) {
     if (!heap_initialized || size == 0) {
         return NULL;
     }
     
-    // Aligner sur 16 bytes minimum
+    // Align on 16 bytes minimum
     size = ROUND_UP(size, MIN_ALLOC_SIZE);
     
-    // Pour les grosses allocations, utiliser directement le PMM
+    // For large allocations, use PMM directly
     if (size >= PAGE_SIZE) {
         size_t pages = ROUND_UP(size, PAGE_SIZE) / PAGE_SIZE;
         uint64_t phys_addr = pmm_alloc_pages(pages);
         if (phys_addr) {
-            // Stocker la taille en pages dans les premiers 8 bytes pour kfree
+            // Store page count in first 8 bytes for kfree
             uint64_t* size_ptr = (uint64_t*)phys_addr;
             *size_ptr = pages;
             
@@ -140,12 +140,12 @@ void* kmalloc(size_t size) {
                    (unsigned long long)size,
                    (unsigned long long)pages,
                    (void*)phys_addr);
-            return (void*)phys_addr; // Identity mapping pour l'instant
+            return (void*)phys_addr; // Identity mapping for now
         }
         return NULL;
     }
     
-    // Chercher un bloc libre assez grand
+    // Find a free block large enough
     heap_block_t* block = heap_start;
     while (block) {
         if (!validate_block(block)) {
@@ -153,14 +153,14 @@ void* kmalloc(size_t size) {
         }
         
         if (block->is_free && block->size >= size) {
-            // Diviser le bloc si nécessaire
+            // Split block if necessary
             block = split_block(block, size);
             if (!block) continue;
             
-            // Marquer comme alloué
+            // Mark as allocated
             block->is_free = false;
             
-            // Mettre à jour les statistiques
+            // Update statistics
             total_allocated += block->size;
             num_allocations++;
             if (total_allocated > peak_allocated) {
@@ -181,32 +181,32 @@ void* kmalloc(size_t size) {
     return NULL;
 }
 
-// Libération mémoire noyau
+// Kernel memory deallocation
 void kfree(void* ptr) {
     if (!heap_initialized || !ptr) {
         return;
     }
     
-    // Vérifier si c'est une allocation de page directe
+    // Check if it's a direct page allocation
     if (IS_ALIGNED((uint64_t)ptr, PAGE_SIZE)) {
-        // Essayer de déterminer la taille via les métadonnées
-        // Pour les allocations page, on stocke la taille dans les premiers 8 bytes
+        // Try to determine size via metadata
+        // For page allocations, we store size in first 8 bytes
         uint64_t* size_ptr = (uint64_t*)ptr;
         uint64_t size_pages = *size_ptr;
         
-        // Validation basique de la taille
+        // Basic size validation
         if (size_pages > 0 && size_pages <= 1024) { // Max 4MB
             pmm_free_pages((uint64_t)ptr, size_pages);
             kdebug("Large kfree: 0x%p (%llu pages)", ptr, (unsigned long long)size_pages);
         } else {
-            // Fallback: libérer une seule page
+            // Fallback: free a single page
             pmm_free_page((uint64_t)ptr);
             kwarning("Large kfree: unknown size, freed 1 page at 0x%p", ptr);
         }
         return;
     }
     
-    // Obtenir le header du bloc
+    // Get block header
     heap_block_t* block = (heap_block_t*)((char*)ptr - sizeof(heap_block_t));
     
     if (!validate_block(block)) {
@@ -219,21 +219,21 @@ void kfree(void* ptr) {
         return;
     }
     
-    // Marquer comme libre
+    // Mark as free
     block->is_free = true;
     
-    // Mettre à jour les statistiques
+    // Update statistics
     total_allocated -= block->size;
     num_frees++;
     
     kdebug("kfree: %llu bytes at 0x%p",
            (unsigned long long)block->size, ptr);
     
-    // Fusionner avec les blocs adjacents libres
+    // Merge with adjacent free blocks
     coalesce_free_blocks(block);
 }
 
-// Réallocation
+// Reallocation
 void* krealloc(void* ptr, size_t new_size) {
     if (!ptr) {
         return kmalloc(new_size);
@@ -244,35 +244,35 @@ void* krealloc(void* ptr, size_t new_size) {
         return NULL;
     }
     
-    // Optimiser en essayant d'étendre le bloc existant
+    // Optimize by trying to extend existing block
     heap_block_t* old_block = (heap_block_t*)((char*)ptr - sizeof(heap_block_t));
     if (validate_block(old_block)) {
         size_t old_size = old_block->size;
         
-        // Si la nouvelle taille est plus petite ou égale, réutiliser le bloc
+        // If new size is smaller or equal, reuse block
         if (new_size <= old_size) {
-            // Optionnellement diviser le bloc si la différence est significative
+            // Optionally split block if difference is significant
             if (old_size - new_size >= sizeof(heap_block_t) + MIN_ALLOC_SIZE) {
                 split_block(old_block, new_size);
             }
             return ptr;
         }
         
-        // Essayer d'étendre en fusionnant avec le bloc suivant libre
+        // Try to extend by merging with next free block
         if (old_block->next && old_block->next->is_free) {
             char* block_end = (char*)old_block + sizeof(heap_block_t) + old_block->size;
             if (block_end == (char*)old_block->next) {
                 size_t combined_size = old_size + sizeof(heap_block_t) + old_block->next->size;
                 
                 if (combined_size >= new_size) {
-                    // Fusionner les blocs
-                    old_block->size = combined_size;
+                                         // Merge blocks
+                     old_block->size = combined_size;
                     if (old_block->next->next) {
                         old_block->next->next->prev = old_block;
                     }
                     old_block->next = old_block->next->next;
                     
-                    // Diviser si nécessaire
+                    // Split if necessary
                     if (combined_size - new_size >= sizeof(heap_block_t) + MIN_ALLOC_SIZE) {
                         split_block(old_block, new_size);
                     }
@@ -285,24 +285,24 @@ void* krealloc(void* ptr, size_t new_size) {
         }
     }
     
-    // Allocation standard si l'optimisation a échoué
+    // Standard allocation if optimization failed
     void* new_ptr = kmalloc(new_size);
     if (!new_ptr) {
         return NULL;
     }
     
-    // Déterminer la vraie taille de l'ancien bloc pour la copie
+    // Determine real size of old block for copy
     size_t copy_size = new_size;
     if (validate_block(old_block)) {
         copy_size = MIN(old_block->size, new_size);
     }
     
-    // Copie optimisée par chunks de 8 bytes
+    // Optimized copy by 8-byte chunks
     char* src = (char*)ptr;
     char* dst = (char*)new_ptr;
     size_t remaining = copy_size;
     
-    // Copie par uint64_t quand possible
+    // Copy by uint64_t when possible
     while (remaining >= 8 && IS_ALIGNED((uint64_t)src, 8) && IS_ALIGNED((uint64_t)dst, 8)) {
         *(uint64_t*)dst = *(uint64_t*)src;
         src += 8;
@@ -310,7 +310,7 @@ void* krealloc(void* ptr, size_t new_size) {
         remaining -= 8;
     }
     
-    // Copie byte par byte pour le reste
+    // Copy byte by byte for the rest
     while (remaining > 0) {
         *dst++ = *src++;
         remaining--;
@@ -320,7 +320,7 @@ void* krealloc(void* ptr, size_t new_size) {
     return new_ptr;
 }
 
-// Obtenir statistiques du heap
+// Get heap statistics
 void heap_get_stats(void) {
     if (!heap_initialized) {
         return;
@@ -335,12 +335,12 @@ void heap_get_stats(void) {
     kinfo("  Active allocations: %llu", (unsigned long long)(num_allocations - num_frees));
 }
 
-// Initialisation complète du sous-système mémoire
+// Complete memory subsystem initialization
 void mm_init(void) {
     kinfo("Initializing memory management");
     
     pmm_init();
-    // vmm_init(); // Déjà initialisé par mmu_init()
+    // vmm_init(); // Already initialized by mmu_init()
     slab_init();
     heap_init();
     

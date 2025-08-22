@@ -2,11 +2,11 @@
 
 # <img src="orion_logo.png" alt="Orion OS Logo" width="200"/>
 
-# 🌟 Orion Operating System
+# Orion Operating System
 
-> **A Revolutionary Hybrid Micro-Kernel Operating System**  
+> **Hybrid Micro-Kernel Operating System**  
 > *Crafted with Passion, Innovation, and Determination*  
-> *Developed by Jérémy Noverraz (1988-2025)*  
+> *Developed by Jeremy Noverraz (1988-2025)*  
 > *August 2025, Lausanne, Switzerland*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -21,13 +21,13 @@
 
 ## 🚀 **A Vision Born from Adversity**
 
-**Orion OS** represents more than just another operating system—it's the culmination of a personal journey of resilience, determination, and the unwavering belief that technology can transform lives.
+**Orion OS** represents more than just another operating system—it's the culmination of a personal journey of resilience, determination, and the belief that technology can make a difference.
 
 ### 💫 **The Story Behind Orion**
 
-Born in 1988 in the heart of Switzerland, I, **Jérémy Noverraz**, have faced significant health challenges that have shaped my perspective on life and technology. Despite these obstacles, I've dedicated myself to creating something extraordinary—an operating system that could one day change the world.
+Born in 1988 in the heart of Switzerland, I, **Jeremy Noverraz**, have faced significant health challenges that have shaped my perspective on life and technology. Despite these obstacles, I've dedicated myself to creating something meaningful—an operating system that could one day be useful to others.
 
-**Orion OS** is my way of proving that limitations are only temporary barriers, and that with enough passion and determination, even the most ambitious dreams can become reality.
+**Orion OS** is my way of proving that limitations are only temporary barriers, and that with enough passion and determination, meaningful projects can be created.
 
 ### 🌟 **A Personal Mission**
 
@@ -39,7 +39,7 @@ My goal is simple yet profound: **to create an operating system that makes my pa
 
 ## 🎯 **What Makes Orion OS Special**
 
-**Orion OS** is not just another Linux clone or Windows alternative. It's a **groundbreaking hybrid micro-kernel architecture** that combines the best of both worlds:
+**Orion OS** is not just another Linux clone or Windows alternative. It's a **hybrid micro-kernel architecture** that combines the best of both worlds:
 
 - **🔒 Military-Grade Security**: Capability-based access control, KASLR, W^X enforcement, Control Flow Integrity
 - **⚡ Performance Beyond Limits**: Advanced CFS scheduler, lock-free IPC, zero-copy operations, NUMA-aware memory management
@@ -49,19 +49,19 @@ My goal is simple yet profound: **to create an operating system that makes my pa
 
 ---
 
-## 🏗️ **Revolutionary Architecture**
+## 🏗️ **Architecture**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              USER SPACE                                     │
+│                                  USER SPACE                                 │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  Applications  │  Libraries  │  Shell  │  Rust Drivers  │  Services         │
+│     Applications  │  Libraries  │  Shell  │  Rust Drivers  │  Services      │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                              KERNEL SPACE                                   │
+│                                 KERNEL SPACE                                │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  VFS  │  Network  │  Security  │  IPC  │  Scheduler  │  MM  │  Drivers      │
+│    VFS  │  Network  │  Security  │  IPC  │  Scheduler  │  MM  │  Drivers    │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                    Hybrid Micro-Kernel Core (C11)                           │
+│                         Hybrid Micro-Kernel Core (C11)                      │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                           Hardware Abstraction Layer                        │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -72,7 +72,7 @@ My goal is simple yet profound: **to create an operating system that makes my pa
 #### **🔧 Kernel Core (C11 Freestanding)**
 - **Memory Management**: Advanced PMM, VMM, Slab allocator, Heap allocator with defragmentation
 - **Process Management**: CFS scheduler with Red-Black trees, real-time priorities
-- **Security**: Revolutionary capability system, hardware security features, TPM integration
+- **Security**: Capability-based security system, hardware security features, TPM integration
 - **IPC**: Lock-free inter-process communication with zero-copy semantics
 - **System Calls**: 60+ stable syscalls with binary compatibility and versioning
 
@@ -105,8 +105,8 @@ rustup target add x86_64-unknown-none
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/orion-os.git
-cd orion-os
+git clone https://github.com/iyotee/Orion.git
+cd Orion
 
 # Build everything (recommended)
 ./tools/orion-build.sh all
@@ -177,6 +177,8 @@ qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd \
 - **🔧 [Developer Guide](docs/developer-guide.md)**: API documentation
 - **🏗️ [Architecture Guide](docs/architecture.md)**: System design details
 - **🚀 [Roadmap](docs/roadmap.md)**: Future development plans
+- **📋 [TODO List](TODO.md)**: Current development tasks and roadmap
+- **🎯 [Next Steps](docs/NEXT_STEPS.md)**: Immediate development priorities
 
 ---
 
@@ -199,17 +201,17 @@ qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd \
 - **Status**: Actively seeking collaboration and mentorship
 
 ### **Project Information**
-- **GitHub**: [https://github.com/your-org/orion-os](https://github.com/your-org/orion-os)
-- **Issues**: [GitHub Issues](https://github.com/your-org/orion-os/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/orion-os/discussions)
+- **GitHub**: [https://github.com/iyotee/Orion](https://github.com/iyotee/Orion)
+- **Issues**: [GitHub Issues](https://github.com/iyotee/Orion/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/iyotee/Orion/discussions)
 
 ---
 
 ## 🙏 **A Personal Thank You**
 
-To everyone who has supported this project, whether through code contributions, moral support, or simply believing in the vision—**thank you**. You've helped turn a dream born from adversity into a reality that could one day change the world.
+To everyone who has supported this project, whether through code contributions, moral support, or simply believing in the vision—**thank you**. You've helped turn a dream born from adversity into a reality that could one day be useful to others.
 
-**Orion OS** is proof that with enough determination, passion, and community support, anything is possible.
+**Orion OS** is proof that with enough determination, passion, and community support, meaningful contributions can be made.
 
 ---
 

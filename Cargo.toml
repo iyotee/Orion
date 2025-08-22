@@ -17,13 +17,13 @@ members = [
 ]
 
 [workspace.dependencies]
-# Dépendances communes pour tous les crates
+# Common dependencies for all crates
 serde = { version = "1.0", default-features = false }
 bitflags = "2.0"
 spin = "0.9"
 
 [profile.release]
-# Optimisations pour performance maximale
+# Optimizations for maximum performance
 opt-level = 3
 debug = false
 panic = "abort"
@@ -31,7 +31,7 @@ codegen-units = 1
 lto = true
 
 [profile.dev]
-# Debug symbols pour développement
+# Debug symbols for development
 opt-level = 0
 debug = true
 panic = "abort"

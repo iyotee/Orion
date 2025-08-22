@@ -4,7 +4,7 @@
  * Complete timer subsystem with PIT, HPET, and APIC timer support
  * for precise timing and scheduling operations.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -265,15 +265,61 @@ uint64_t arch_get_timestamp_frequency(void) {
 
 // Calibrate timestamp frequency
 void arch_calibrate_timestamp(void) {
-    // TODO: Implement TSC frequency calibration
-    // This would involve:
-    // 1. Reading PIT/HPET at start
-    // 2. Reading TSC at start
-    // 3. Waiting for a known interval
-    // 4. Reading TSC at end
-    // 5. Calculating frequency
+    static uint64_t calibrated_frequency = 0;
     
-    kinfo("TSC frequency calibration not yet implemented");
+    if (calibrated_frequency != 0) {
+        return; // Already calibrated
+    }
+    
+    kinfo("Calibrating TSC frequency...");
+    
+    // Method 1: Try CPUID leaf 0x15 (Intel TSC frequency)
+    uint32_t eax, ebx, ecx, edx;
+    cpuid(0x15, &eax, &ebx, &ecx, &edx);
+    
+    if (eax != 0 && ebx != 0) {
+        // Calculate frequency from CPUID
+        if (ecx != 0) {
+            calibrated_frequency = (uint64_t)ecx * ebx / eax;
+            kinfo("TSC frequency from CPUID: %llu Hz", calibrated_frequency);
+            return;
+        }
+    }
+    
+    // Method 2: Calibrate using PIT
+    // Set PIT to one-shot mode, count ~10ms
+    outb(0x43, 0x30); // Channel 0, lobyte/hibyte, mode 0
+    outb(0x40, 0x9C); // Low byte of 11932 (10ms at 1.193182 MHz)
+    outb(0x40, 0x2E); // High byte
+    
+    // Read initial TSC
+    uint64_t tsc_start = arch_get_timestamp();
+    
+    // Wait for PIT to count down
+    uint8_t status;
+    do {
+        outb(0x43, 0xE2); // Read-back command for channel 0
+        status = inb(0x40);
+    } while (!(status & 0x80)); // Wait for output pin to go high
+    
+    // Read final TSC
+    uint64_t tsc_end = arch_get_timestamp();
+    
+    // Calculate frequency (10ms interval)
+    uint64_t tsc_diff = tsc_end - tsc_start;
+    calibrated_frequency = tsc_diff * 100; // Scale to 1 second
+    
+    kinfo("TSC frequency calibrated: %llu Hz", calibrated_frequency);
+    
+    // Store calibrated value for future use
+    static bool frequency_stored = false;
+    if (!frequency_stored) {
+        // Store in global kernel configuration
+        kernel_config.tsc_frequency = calibrated_frequency;
+        kernel_config.tsc_calibrated = true;
+        frequency_stored = true;
+        kinfo("TSC frequency stored in kernel config: %llu Hz", calibrated_frequency);
+    }
 }
 
 // ========================================

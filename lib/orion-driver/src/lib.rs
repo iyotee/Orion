@@ -5,7 +5,7 @@
  * Provides traits and utilities for developing safe and efficient
  * device drivers in Rust stable #![no_std].
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -13,7 +13,7 @@
  */
 
 #![no_std]
-#![forbid(unsafe_code)] // Except in specific HAL modules when necessary
+#![deny(unsafe_code)] // Allow unsafe code in specific modules when necessary
 
 pub mod device;
 pub mod ipc;

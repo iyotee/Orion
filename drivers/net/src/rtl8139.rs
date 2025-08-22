@@ -4,7 +4,7 @@
  * Driver for the popular Realtek RTL8139 Fast Ethernet controller.
  * Widely used in older systems and virtualized environments.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project
@@ -285,7 +285,7 @@ impl OrionDriver for Rtl8139Driver {
         DriverInfo {
             name: "Realtek RTL8139 Network Driver",
             version: "1.0.0",
-            author: "Jérémy Noverraz",
+            author: "Jeremy Noverraz",
             description: "Fast Ethernet driver for Realtek RTL8139 controllers",
         }
     }

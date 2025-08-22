@@ -4,7 +4,7 @@
  * Core traits that all Orion drivers must implement for consistent
  * driver architecture and type safety.
  *
- * Developed by Jérémy Noverraz (1988-2025)
+ * Developed by Jeremy Noverraz (1988-2025)
  * August 2025, Lausanne, Switzerland
  *
  * Copyright (c) 2024-2025 Orion OS Project

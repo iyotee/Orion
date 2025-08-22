@@ -1,15 +1,15 @@
-// Gestionnaire d'appels système Orion
+// Orion system call handler
 #include <orion/kernel.h>
 #include <orion/types.h>
 #include <orion/syscalls.h>
 
-// Déclarations des fonctions manquantes (stubs)
+// Missing function declarations (stubs)
 extern void thread_exit(int exit_code);
 extern or_cap_t ipc_port_create(uint64_t pid);
 extern int ipc_send_message(or_cap_t port, void* data, uint64_t size, uint64_t timeout_ns);
 extern int ipc_recv_message(or_cap_t port, void* buffer, uint64_t size, uint64_t timeout_ns);
 
-// Table des appels système
+// System call table
 typedef int64_t (*syscall_handler_t)(uint64_t arg1, uint64_t arg2, 
                                     uint64_t arg3, uint64_t arg4,
                                     uint64_t arg5, uint64_t arg6);
@@ -25,7 +25,7 @@ static syscall_handler_t syscall_table[MAX_SYSCALLS] = {
     [SYS_GETPID]        = (syscall_handler_t)sys_getpid_impl,
     [SYS_GETTID]        = (syscall_handler_t)sys_gettid_impl,
     
-    // Mémoire
+    // Memory
     [SYS_VM_MAP]        = (syscall_handler_t)sys_vm_map_impl,
     [SYS_VM_UNMAP]      = (syscall_handler_t)sys_vm_unmap_impl,
     [SYS_VM_PROTECT]    = (syscall_handler_t)sys_vm_protect_impl,
@@ -41,7 +41,7 @@ static syscall_handler_t syscall_table[MAX_SYSCALLS] = {
     [SYS_PORT_SHARE]    = (syscall_handler_t)sys_port_share_impl,
     [SYS_MSG_FORWARD]   = (syscall_handler_t)sys_msg_forward_impl,
     
-    // Temps
+    // Time
     [SYS_CLOCK_GET]     = (syscall_handler_t)sys_clock_get_impl,
     [SYS_TIMER_CREATE]  = (syscall_handler_t)sys_timer_create_impl,
     [SYS_TIMER_START]   = (syscall_handler_t)sys_timer_start_impl,
@@ -53,50 +53,50 @@ static syscall_handler_t syscall_table[MAX_SYSCALLS] = {
     [SYS_IO_POLL]       = (syscall_handler_t)sys_io_poll_impl,
     [SYS_IO_CANCEL]     = (syscall_handler_t)sys_io_cancel_impl,
     
-    // Objets
+    // Objects
     [SYS_OBJ_INFO]      = (syscall_handler_t)sys_obj_info_impl,
     [SYS_OBJ_DUP]       = (syscall_handler_t)sys_obj_dup_impl,
     [SYS_OBJ_CLOSE]     = (syscall_handler_t)sys_obj_close_impl,
     
-    // Sécurité
+    // Security
     [SYS_CAP_GRANT]     = (syscall_handler_t)sys_cap_grant_impl,
     [SYS_CAP_REVOKE]    = (syscall_handler_t)sys_cap_revoke_impl,
     [SYS_CAP_QUERY]     = (syscall_handler_t)sys_cap_query_impl,
     [SYS_SANDBOX_LOAD]  = (syscall_handler_t)sys_sandbox_load_impl,
     [SYS_AUDIT_EMIT]    = (syscall_handler_t)sys_audit_emit_impl,
     
-    // Divers
+    // Miscellaneous
     [SYS_INFO]          = (syscall_handler_t)sys_info_impl,
     [SYS_DBG_TRACE]     = (syscall_handler_t)sys_dbg_trace_impl,
     [SYS_RANDOM]        = (syscall_handler_t)sys_random_impl
 };
 
-// Handler principal des syscalls (appelé depuis l'assembleur)
+// Main syscall handler (called from assembly)
 int64_t syscall_handler(uint64_t syscall_num, uint64_t arg1, uint64_t arg2,
                        uint64_t arg3, uint64_t arg4, uint64_t arg5, uint64_t arg6) {
     
     kdebug("Syscall %llu called", (unsigned long long)syscall_num);
     
-    // Vérifier numéro syscall valide
+    // Check valid syscall number
     if (syscall_num >= MAX_SYSCALLS) {
         kerror("Invalid syscall number: %llu", (unsigned long long)syscall_num);
         return -OR_ENOSYS;
     }
     
-    // Vérifier handler existe
+    // Check handler exists
     syscall_handler_t handler = syscall_table[syscall_num];
     if (!handler) {
         kerror("Unimplemented syscall: %llu", (unsigned long long)syscall_num);
         return -OR_ENOSYS;
     }
     
-    // Appeler le handler
+    // Call the handler
     return handler(arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
-// Implémentations des syscalls
+// System call implementations
 
-// sys_info - obtenir infos système
+// sys_info - get system information
 int64_t sys_info_impl(or_system_info_t* info)
 {
     if (!info) {
@@ -105,22 +105,22 @@ int64_t sys_info_impl(or_system_info_t* info)
     
     kdebug("sys_info called");
     
-    // Vérifier que l'adresse userland est valide
+    // Check that userland address is valid
     if (!mmu_is_valid_addr((uint64_t)info)) {
         return -OR_EFAULT;
     }
     
-    // Copier les informations système de façon sécurisée
+    // Copy system information securely
     or_system_info_t kernel_info = {0};
     
-    // Copier la version du kernel
+    // Copy kernel version
     const char* version = ORION_VERSION_STR;
     for (int i = 0; i < 31 && version[i]; i++) {
         kernel_info.kernel_version[i] = version[i];
     }
     kernel_info.kernel_version[31] = '\0';
     
-    // Obtenir les statistiques mémoire
+    // Get memory statistics
     uint64_t total_mem, free_mem, used_mem;
     pmm_get_stats(&total_mem, &free_mem, &used_mem);
     
@@ -132,36 +132,36 @@ int64_t sys_info_impl(or_system_info_t* info)
     kernel_info.process_count = scheduler_get_process_count();
     kernel_info.thread_count = scheduler_get_thread_count();
     
-    // Copie sécurisée vers userland (simulation)
+    // Secure copy to userland (simulation)
     *info = kernel_info;
     
     return OR_OK;
 }
 
-// sys_exit - terminer processus
+// sys_exit - terminate process
 int64_t sys_exit_impl(int exit_code) {
     kinfo("Process exit with code %d", exit_code);
     
-    // Nettoyer le processus courant
+    // Clean up current process
     process_t* current_process = scheduler_get_current_process();
     if (current_process) {
-        // Fermer tous les handles ouverts
+        // Close all open handles
         for (int i = 0; i < MAX_HANDLES; i++) {
             if (current_process->handles[i].type != HANDLE_TYPE_NONE) {
                 sys_obj_close_impl(i);
             }
         }
         
-        // Libérer l'espace d'adressage
+        // Free address space
         if (current_process->vm_space && !current_process->vm_space->is_kernel) {
             vmm_destroy_space(current_process->vm_space);
         }
         
-        // Marquer le processus comme zombie
+        // Mark process as zombie
         current_process->state = PROC_STATE_ZOMBIE;
         current_process->exit_code = exit_code;
         
-        // Réveiller le parent s'il attend
+        // Wake up parent if waiting
         if (current_process->parent) {
             scheduler_wakeup_process(current_process->parent);
         }
@@ -169,11 +169,11 @@ int64_t sys_exit_impl(int exit_code) {
     
     thread_exit(exit_code);
     
-    // Ne devrait jamais arriver
+    // Should never reach here
     return OR_OK;
 }
 
-// sys_yield - céder CPU
+// sys_yield - yield CPU
 int64_t sys_yield_impl(void) {
     kdebug("sys_yield called");
     
@@ -182,7 +182,7 @@ int64_t sys_yield_impl(void) {
     return OR_OK;
 }
 
-// sys_vm_map - mapper mémoire virtuelle
+// sys_vm_map - map virtual memory
 int64_t sys_vm_map_impl(or_vm_map_t* map_params) {
     if (!map_params) {
         return -OR_EINVAL;
@@ -194,7 +194,7 @@ int64_t sys_vm_map_impl(or_vm_map_t* map_params) {
            map_params->prot,
            map_params->flags);
     
-    // Valider les paramètres
+    // Validate parameters
     if (map_params->length == 0 || !IS_ALIGNED(map_params->length, PAGE_SIZE)) {
         return -OR_EINVAL;
     }
@@ -203,41 +203,41 @@ int64_t sys_vm_map_impl(or_vm_map_t* map_params) {
         return -OR_EINVAL;
     }
     
-    // Obtenir l'espace d'adressage du processus courant
+    // Get address space of current process
     process_t* current_process = scheduler_get_current_process();
     if (!current_process || !current_process->vm_space) {
         return -OR_EINVAL;
     }
     
-    // Convertir les flags de protection
+    // Convert protection flags
     uint64_t vm_flags = 0;
     if (map_params->prot & VM_PROT_READ) vm_flags |= VM_FLAG_READ;
     if (map_params->prot & VM_PROT_WRITE) vm_flags |= VM_FLAG_WRITE;
     if (map_params->prot & VM_PROT_EXEC) vm_flags |= VM_FLAG_EXEC;
     if (!current_process->vm_space->is_kernel) vm_flags |= VM_FLAG_USER;
     
-    // Calculer le nombre de pages nécessaires
+    // Calculate number of pages needed
     size_t pages_needed = map_params->length / PAGE_SIZE;
     
     uint64_t vaddr;
     if (map_params->flags & VM_MAP_FIXED && map_params->addr) {
-        // Adresse fixe demandée
+        // Fixed address requested
         vaddr = map_params->addr;
         
-        // Vérifier que l'espace est libre
+        // Check if space is free
         for (size_t i = 0; i < pages_needed; i++) {
             if (mmu_is_valid_addr(vaddr + i * PAGE_SIZE)) {
-                return -OR_EINVAL; // Déjà mappé
+                return -OR_EINVAL; // Already mapped
             }
         }
         
-        // Mapper les pages une par une
+        // Map pages one by one
         for (size_t i = 0; i < pages_needed; i++) {
             uint64_t page_vaddr = vaddr + i * PAGE_SIZE;
             uint64_t page_paddr = pmm_alloc_page();
             
             if (!page_paddr) {
-                // Nettoyer les pages déjà mappées
+                // Clean up already mapped pages
                 for (size_t j = 0; j < i; j++) {
                     vmm_unmap_page(current_process->vm_space, vaddr + j * PAGE_SIZE);
                 }
@@ -246,7 +246,7 @@ int64_t sys_vm_map_impl(or_vm_map_t* map_params) {
             
             if (vmm_map_page(current_process->vm_space, page_vaddr, page_paddr, vm_flags) != OR_OK) {
                 pmm_free_page(page_paddr);
-                // Nettoyer les pages déjà mappées
+                // Clean up already mapped pages
                 for (size_t j = 0; j < i; j++) {
                     vmm_unmap_page(current_process->vm_space, vaddr + j * PAGE_SIZE);
                 }
@@ -254,7 +254,7 @@ int64_t sys_vm_map_impl(or_vm_map_t* map_params) {
             }
         }
     } else {
-        // Allocation automatique d'adresse
+        // Automatic address allocation
         vaddr = vmm_alloc_pages(current_process->vm_space, pages_needed, vm_flags);
         if (!vaddr) {
             return -OR_ENOMEM;
@@ -267,13 +267,13 @@ int64_t sys_vm_map_impl(or_vm_map_t* map_params) {
     return (int64_t)vaddr;
 }
 
-// sys_port_create - créer port IPC
+// sys_port_create - create IPC port
 int64_t sys_port_create_impl(or_cap_t* out_port) {
     if (!out_port) {
         return -OR_EINVAL;
     }
     
-    // Obtenir PID du processus appelant
+    // Get PID of calling process
     process_t* current_process = scheduler_get_current_process();
     if (!current_process) {
         return -OR_EINVAL;
@@ -284,7 +284,7 @@ int64_t sys_port_create_impl(or_cap_t* out_port) {
         return -OR_ENOMEM;
     }
     
-    // Vérifier adresse userland et copier de façon sécurisée
+    // Check userland address and copy securely
     if (!mmu_is_valid_addr((uint64_t)out_port)) {
         return -OR_EFAULT;
     }
@@ -295,7 +295,7 @@ int64_t sys_port_create_impl(or_cap_t* out_port) {
     return OR_OK;
 }
 
-// sys_port_send - envoyer message IPC
+// sys_port_send - send IPC message
 int64_t sys_port_send_impl(or_msg_send_t* msg) {
     if (!msg) {
         return -OR_EINVAL;
@@ -309,7 +309,7 @@ int64_t sys_port_send_impl(or_msg_send_t* msg) {
                            msg->data_size, msg->timeout_ns);
 }
 
-// sys_port_recv - recevoir message IPC
+// sys_port_recv - receive IPC message
 int64_t sys_port_recv_impl(or_msg_recv_t* msg) {
     if (!msg) {
         return -OR_EINVAL;
@@ -322,10 +322,10 @@ int64_t sys_port_recv_impl(or_msg_recv_t* msg) {
 }
 
 // ========================================
-// NOUVELLES IMPLÉMENTATIONS DE SYSCALLS
+// NEW SYSTEM CALL IMPLEMENTATIONS
 // ========================================
 
-// sys_proc_create - créer un nouveau processus
+// sys_proc_create - create new process
 int64_t sys_proc_create_impl(const char* executable_path, char* const argv[], char* const envp[]) {
     if (!executable_path) {
         return -OR_EINVAL;
@@ -333,34 +333,34 @@ int64_t sys_proc_create_impl(const char* executable_path, char* const argv[], ch
     
     kdebug("sys_proc_create called: path=%s", executable_path);
     
-    // Créer un nouveau processus
+    // Create new process
     process_t* new_process = scheduler_create_process();
     if (!new_process) {
         return -OR_ENOMEM;
     }
     
-    // Charger l'exécutable ELF
+    // Load ELF executable
     int result = elf_load_process(new_process, executable_path);
     if (result != OR_OK) {
         scheduler_destroy_process(new_process);
         return result;
     }
     
-    // Configurer les arguments et variables d'environnement
+    // Setup arguments and environment variables
     result = process_setup_args(new_process, argv, envp);
     if (result != OR_OK) {
         scheduler_destroy_process(new_process);
         return result;
     }
     
-    // Ajouter au scheduler
+    // Add to scheduler
     scheduler_add_process(new_process);
     
     kdebug("Created process PID %llu", (unsigned long long)new_process->pid);
     return (int64_t)new_process->pid;
 }
 
-// sys_thread_create - créer un nouveau thread
+// sys_thread_create - create new thread
 int64_t sys_thread_create_impl(uint64_t entry_point, uint64_t stack_pointer, uint64_t arg) {
     kdebug("sys_thread_create called: entry=0x%p, stack=0x%p", 
            (void*)entry_point, (void*)stack_pointer);
@@ -379,7 +379,7 @@ int64_t sys_thread_create_impl(uint64_t entry_point, uint64_t stack_pointer, uin
     return (int64_t)new_thread->tid;
 }
 
-// sys_wait - attendre la fin d'un processus/thread
+// sys_wait - wait for process/thread to finish
 int64_t sys_wait_impl(uint64_t pid, int* status, uint64_t options) {
     kdebug("sys_wait called: pid=%llu", (unsigned long long)pid);
     
@@ -390,29 +390,29 @@ int64_t sys_wait_impl(uint64_t pid, int* status, uint64_t options) {
     
     process_t* target = scheduler_find_process(pid);
     if (!target || target->parent != current_process) {
-        return -OR_EINVAL; // Pas notre enfant
+        return -OR_EINVAL; // Not our child
     }
     
-    // Attendre que le processus devienne zombie
+    // Wait for process to become zombie
     while (target->state != PROC_STATE_ZOMBIE) {
         scheduler_block_current_process();
         sched_yield();
     }
     
-    // Récupérer le code de sortie
+    // Get exit code
     if (status && mmu_is_valid_addr((uint64_t)status)) {
         *status = target->exit_code;
     }
     
     uint64_t waited_pid = target->pid;
     
-    // Nettoyer le processus zombie
+    // Clean up zombie process
     scheduler_destroy_process(target);
     
     return (int64_t)waited_pid;
 }
 
-// sys_signal - envoyer un signal
+// sys_signal - send signal
 int64_t sys_signal_impl(uint64_t target_pid, uint32_t signal_num) {
     kdebug("sys_signal called: target=%llu, signal=%u", 
            (unsigned long long)target_pid, signal_num);
@@ -425,19 +425,19 @@ int64_t sys_signal_impl(uint64_t target_pid, uint32_t signal_num) {
     return signal_send(target, signal_num);
 }
 
-// sys_getpid - obtenir PID du processus courant
+// sys_getpid - get current process ID
 int64_t sys_getpid_impl(void) {
     process_t* current_process = scheduler_get_current_process();
     return current_process ? (int64_t)current_process->pid : -OR_EINVAL;
 }
 
-// sys_gettid - obtenir TID du thread courant  
+// sys_gettid - get current thread ID  
 int64_t sys_gettid_impl(void) {
     thread_t* current_thread = scheduler_get_current_thread();
     return current_thread ? (int64_t)current_thread->tid : -OR_EINVAL;
 }
 
-// sys_vm_unmap - démapper des pages de mémoire virtuelle
+// sys_vm_unmap - unmap virtual memory pages
 int64_t sys_vm_unmap_impl(uint64_t addr, size_t length) {
     if (!IS_ALIGNED(addr, PAGE_SIZE) || !IS_ALIGNED(length, PAGE_SIZE) || length == 0) {
         return -OR_EINVAL;
@@ -457,7 +457,7 @@ int64_t sys_vm_unmap_impl(uint64_t addr, size_t length) {
     return OR_OK;
 }
 
-// sys_vm_protect - changer les permissions de pages mémoire
+// sys_vm_protect - change memory page permissions
 int64_t sys_vm_protect_impl(uint64_t addr, size_t length, uint32_t new_prot) {
     if (!IS_ALIGNED(addr, PAGE_SIZE) || !IS_ALIGNED(length, PAGE_SIZE) || length == 0) {
         return -OR_EINVAL;
@@ -468,7 +468,7 @@ int64_t sys_vm_protect_impl(uint64_t addr, size_t length, uint32_t new_prot) {
         return -OR_EINVAL;
     }
     
-    // Convertir les permissions
+    // Convert permissions
     uint64_t vm_flags = 0;
     if (new_prot & VM_PROT_READ) vm_flags |= VM_FLAG_READ;
     if (new_prot & VM_PROT_WRITE) vm_flags |= VM_FLAG_WRITE;
@@ -486,7 +486,7 @@ int64_t sys_vm_protect_impl(uint64_t addr, size_t length, uint32_t new_prot) {
     return OR_OK;
 }
 
-// Stubs pour les syscalls restants (à implémenter plus tard)
+// Stubs for remaining system calls (to be implemented later)
 int64_t sys_shm_create_impl(size_t size, uint32_t flags) {
     (void)size; (void)flags;
     return -OR_ENOSYS;
@@ -578,10 +578,10 @@ int64_t sys_obj_close_impl(or_cap_t cap) {
     }
     
     if (current_process->handles[cap].type == HANDLE_TYPE_NONE) {
-        return -OR_EINVAL; // Déjà fermé
+        return -OR_EINVAL; // Already closed
     }
     
-    // Nettoyer le handle selon son type
+    // Clean up handle based on type
     handle_cleanup(&current_process->handles[cap]);
     current_process->handles[cap].type = HANDLE_TYPE_NONE;
     
@@ -623,7 +623,7 @@ int64_t sys_random_impl(void* buffer, size_t size) {
         return -OR_EINVAL;
     }
     
-    // Générateur pseudo-aléatoire simple pour commencer
+    // Simple pseudo-random number generator for now
     static uint64_t rand_state = 0x123456789ABCDEF0ULL;
     
     uint8_t* bytes = (uint8_t*)buffer;
@@ -635,11 +635,11 @@ int64_t sys_random_impl(void* buffer, size_t size) {
     return (int64_t)size;
 }
 
-// Initialiser le système d'appels système
+// Initialize system call interface
 void syscalls_init(void) {
     kinfo("Initializing system call interface");
     
-    // Configurer l'instruction SYSCALL/SYSRET (x86_64)
+    // Configure SYSCALL/SYSRET instruction (x86_64)
     arch_setup_syscall_interface();
     
     kinfo("Syscall interface initialized (%d max syscalls)", MAX_SYSCALLS);
