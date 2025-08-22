@@ -77,34 +77,8 @@ if errorlevel 1 (
     REM Create commit message
     set COMMIT_MSG=Complete ORION OS Wiki documentation
 
-    DOCUMENTATION ADDED:
-    - Home page with overview and navigation
-    - Installation guide for all architectures
-    - Quick start guide for new users
-    - Comprehensive user manual
-    - Development guide for contributors
-    - Contributing guidelines and standards
-    - Architecture overview and design principles
-    - Wiki README and configuration
-    - Deployment guide and summary
-
-    FEATURES:
-    - Multi-architecture support documentation
-    - Performance optimization guides
-    - Security model explanation
-    - Community contribution guidelines
-    - Professional academic tone throughout
-    - Complete deployment instructions
-
-    TOTAL PAGES: 12
-    CONTENT: ~50,000+ words
-    AUDIENCE: Users, Developers, Contributors, Administrators
-
-    This Wiki provides comprehensive documentation for ORION OS,
-    the first truly universal operating system.
-
     REM Commit changes
-    git commit -m "!COMMIT_MSG!"
+    git commit -m "Complete ORION OS Wiki documentation - Added 12 comprehensive documentation pages with professional academic tone"
 
     REM Push to GitHub
     echo [INFO] Pushing to GitHub...
