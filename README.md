@@ -1,6 +1,6 @@
 <div align="center">
 
-# <img src="orion_logo.png" alt="Orion OS Logo" width="350"/>
+# <img src="orion_logo.png" alt="Orion OS Logo" width="500"/>
 
 # Orion Operating System
 
