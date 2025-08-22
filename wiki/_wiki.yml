@@ -1,0 +1,72 @@
+# ORION OS Wiki Configuration
+# This file configures the GitHub Wiki for ORION OS
+
+# Wiki name and description
+name: "ORION OS Wiki"
+description: "Complete documentation for ORION OS - The Universal Operating System"
+
+# Wiki settings
+private: false
+pages_source: "main"
+
+# Wiki structure
+pages:
+  - Home.md
+  - Installation-Guide.md
+  - Quick-Start.md
+  - User-Guide.md
+  - Development-Guide.md
+  - Contributing-Guidelines.md
+  - Architecture-Overview.md
+  - Wiki-README.md
+  - Wiki-Deployment-Guide.md
+  - Wiki-Summary.md
+
+# Wiki navigation
+navigation:
+  - Home
+  - Installation-Guide
+  - Quick-Start
+  - User-Guide
+  - Development-Guide
+  - Contributing-Guidelines
+  - Architecture-Overview
+  - Wiki-README
+  - Wiki-Deployment-Guide
+  - Wiki-Summary
+
+# Wiki categories
+categories:
+  - name: "Getting Started"
+    pages:
+      - Home
+      - Installation-Guide
+      - Quick-Start
+  
+  - name: "User Documentation"
+    pages:
+      - User-Guide
+      - System-Administration
+      - Troubleshooting
+  
+  - name: "Developer Resources"
+    pages:
+      - Development-Guide
+      - Contributing-Guidelines
+      - API-Reference
+  
+  - name: "Technical Documentation"
+    pages:
+      - Architecture-Overview
+      - Kernel-Architecture
+      - Security-Model
+      - Performance-Tuning
+
+# Wiki metadata
+metadata:
+  author: "ORION OS Development Team"
+  version: "1.0.0"
+  last_updated: "2024-12-XX"
+  license: "MIT"
+  repository: "https://github.com/iyotee/Orion"
+  wiki_url: "https://github.com/iyotee/Orion/wiki"
