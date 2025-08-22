@@ -299,6 +299,12 @@ static inline bool spin_trylock(spinlock_t *lock)
 #define OR_EBADF -12
 
 // ====================================
+// SYSTEM CONSTANTS
+// ====================================
+
+#include <orion/limits.h>
+
+// ====================================
 // ATOMIC TYPES AND OPERATIONS
 // ====================================
 

@@ -14,14 +14,7 @@
 #define ORION_PROCESS_H
 
 #include <orion/types.h>
-
-// Forward declarations
-struct process;
-struct thread;
-struct vm_space;
-
-// Process structure (defined in scheduler.h)
-typedef struct process process_t;
+#include <orion/structures.h>
 
 // ========================================
 // PROCESS CREATION AND MANAGEMENT

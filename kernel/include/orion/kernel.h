@@ -15,7 +15,7 @@
 #define ORION_KERNEL_H
 
 #include <orion/types.h>
-#include <orion/scheduler.h>
+#include <orion/forward_decls.h>
 // orion_boot_info structure forward declaration
 struct orion_boot_info;
 
@@ -26,9 +26,7 @@ struct orion_boot_info;
 #define ORION_VERSION_STR "1.0.0-alpha"
 
 // System limits and constraints
-#define MAX_PROCESSES 65536
-#define MAX_THREADS 1048576
-#define MAX_CAPABILITIES 4294967296ULL
+#include <orion/limits.h>
 
 // Note: MAX_CPUS and thread_state_t are defined in scheduler.h
 
@@ -42,16 +40,7 @@ typedef struct cpu_info
     char model[64];
 } cpu_info_t;
 
-// System info structure
-typedef struct system_info
-{
-    char kernel_version[32];
-    uint64_t boot_time;
-    uint64_t total_memory;
-    uint64_t free_memory;
-    uint32_t cpu_count;
-    cpu_info_t cpus[MAX_CPUS];
-} system_info_t;
+// System info structure is defined in types.h as or_system_info_t - no duplication
 
 // Main kernel functions
 void kernel_main(struct orion_boot_info *boot_info);
@@ -59,8 +48,7 @@ void kernel_late_init(void);
 
 // Memory management
 void mm_init(void);
-void *kmalloc(uint64_t size);
-void kfree(void *ptr);
+// Memory management functions are defined in mm.h - no duplication
 
 // Scheduler
 void sched_yield(void);
@@ -108,31 +96,9 @@ int orion_boot_init(const struct orion_boot_info *boot_info);
 int orion_boot_validate(const struct orion_boot_info *boot_info);
 void orion_boot_debug_print(const struct orion_boot_info *boot_info);
 
-// Debugging macros
-#define KLOG_EMERGENCY 0
-#define KLOG_ALERT 1
-#define KLOG_CRITICAL 2
-#define KLOG_ERROR 3
-#define KLOG_WARNING 4
-#define KLOG_NOTICE 5
-#define KLOG_INFO 6
-#define KLOG_DEBUG 7
+// Debugging macros are defined in klog.h - no duplication
+// Use klog_* functions from klog.h for consistent logging
 
-#ifdef DEBUG
-#define klog(level, fmt, ...) kprintf("[%d] " fmt "\n", level, ##__VA_ARGS__)
-#define kdebug(fmt, ...) klog(KLOG_DEBUG, fmt, ##__VA_ARGS__)
-#else
-#define klog(level, fmt, ...)                                \
-    do                                                       \
-    {                                                        \
-        if (level <= KLOG_WARNING)                           \
-            kprintf("[%d] " fmt "\n", level, ##__VA_ARGS__); \
-    } while (0)
-#define kdebug(fmt, ...) ((void)0)
-#endif
-
-#define kerror(fmt, ...) klog(KLOG_ERROR, fmt, ##__VA_ARGS__)
-#define kwarning(fmt, ...) klog(KLOG_WARNING, fmt, ##__VA_ARGS__)
-#define kinfo(fmt, ...) klog(KLOG_INFO, fmt, ##__VA_ARGS__)
+// Use klog_warning(), klog_info() from klog.h for consistency
 
 #endif // ORION_KERNEL_H

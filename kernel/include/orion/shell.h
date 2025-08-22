@@ -21,7 +21,7 @@
 #define ORION_SHELL_H
 
 #include <orion/types.h>
-#include <orion/kernel.h>
+#include <orion/forward_decls.h>
 
 // ====================================
 // SHELL CONFIGURATION
@@ -29,10 +29,7 @@
 
 #define ORION_SHELL_VERSION "1.0.0-advanced"
 #define ORION_SHELL_PROMPT "orion$ "
-#define ORION_SHELL_MAX_CMDLINE 512
-#define ORION_SHELL_MAX_ARGS 32
-#define ORION_SHELL_MAX_HISTORY 100
-#define ORION_SHELL_MAX_ALIAS 50
+#include <orion/limits.h>
 #define ORION_SHELL_BUFFER_SIZE 4096
 
 // ====================================

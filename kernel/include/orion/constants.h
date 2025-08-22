@@ -233,14 +233,8 @@
 // SYSTEM LIMITS
 // ========================================
 
-#define MAX_PROCESSES 1024
-#define MAX_THREADS 4096
-#define MAX_FILES 1024
-#define MAX_PORTS 1024
-#define MAX_SERVERS 32
-#define MAX_DEVICES 256
-#define MAX_MOUNTS 64
-#define MAX_SOCKETS 1024
+// MAX_PROCESSES and MAX_THREADS are defined in kernel.h - no duplication
+#include <orion/limits.h>
 
 // ========================================
 // MEMORY LIMITS

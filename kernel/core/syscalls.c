@@ -158,7 +158,7 @@ int64_t sys_exit_impl(int exit_code) {
         }
         
         // Mark process as zombie
-        current_process->state = PROC_STATE_ZOMBIE;
+        current_process->state = PROCESS_STATE_ZOMBIE;
         current_process->exit_code = exit_code;
         
         // Wake up parent if waiting
@@ -394,7 +394,7 @@ int64_t sys_wait_impl(uint64_t pid, int* status, uint64_t options) {
     }
     
     // Wait for process to become zombie
-    while (target->state != PROC_STATE_ZOMBIE) {
+    while (target->state != PROCESS_STATE_ZOMBIE) {
         scheduler_block_current_process();
         sched_yield();
     }

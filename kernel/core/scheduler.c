@@ -11,9 +11,11 @@
  * License: MIT
  */
 
-#include <orion/kernel.h>
 #include <orion/types.h>
 #include <orion/mm.h>
+#include <orion/process.h>
+#include <orion/thread.h>
+#include <orion/kernel.h>
 
 // ========================================
 // STRUCTURES AND TYPES
@@ -467,7 +469,7 @@ static uint64_t calc_delta_fair(uint64_t delta, uint64_t weight)
 
 process_t *scheduler_create_process(void)
 {
-    process_t *process = KMALLOC(process_t);
+    process_t *process = (process_t *)kmalloc(sizeof(process_t));
     if (!process)
     {
         return NULL;
@@ -477,14 +479,14 @@ process_t *scheduler_create_process(void)
     memset(process, 0, sizeof(process_t));
 
     process->pid = atomic_fetch_add(&next_pid, 1);
-    process->state = PROC_STATE_READY;
+    process->state = PROCESS_STATE_READY;
     process->creation_time = arch_get_timestamp();
 
     // Create address space
     process->vm_space = vmm_create_space(false);
     if (!process->vm_space)
     {
-        KFREE(process);
+        kfree(process);
         return NULL;
     }
 
@@ -512,7 +514,7 @@ thread_t *scheduler_create_thread(process_t *process, uint64_t entry_point, uint
         return NULL;
     }
 
-    thread_t *thread = KMALLOC(thread_t);
+    thread_t *thread = (thread_t *)kmalloc(sizeof(thread_t));
     if (!thread)
     {
         return NULL;
@@ -543,7 +545,7 @@ thread_t *scheduler_create_thread(process_t *process, uint64_t entry_point, uint
         uint64_t stack_vaddr = vmm_alloc_pages(process->vm_space, 2, VM_FLAG_READ | VM_FLAG_WRITE);
         if (!stack_vaddr)
         {
-            KFREE(thread);
+            kfree(thread);
             return NULL;
         }
         thread->stack_base = stack_vaddr;
@@ -835,7 +837,7 @@ void scheduler_block_current_process(void)
         current->state = THREAD_STATE_BLOCKED;
         if (current->parent_process)
         {
-            current->parent_process->state = PROC_STATE_BLOCKED;
+            current->parent_process->state = PROCESS_STATE_BLOCKED;
         }
     }
 }
@@ -851,7 +853,7 @@ void scheduler_wakeup_process(process_t *process)
     if (thread->state == THREAD_STATE_BLOCKED)
     {
         thread->state = THREAD_STATE_READY;
-        process->state = PROC_STATE_READY;
+        process->state = PROCESS_STATE_READY;
         scheduler_add_thread_to_rq(thread);
     }
 }
@@ -922,7 +924,7 @@ void scheduler_destroy_process(process_t *process)
         }
         spinlock_unlock(&rq->lock);
 
-        KFREE(thread);
+        kfree(thread);
         total_threads--;
         thread = next;
     }
@@ -954,7 +956,7 @@ void scheduler_destroy_process(process_t *process)
     total_processes--;
     spinlock_unlock(&process_list_lock);
 
-    KFREE(process);
+    kfree(process);
 }
 
 // ========================================
@@ -1403,7 +1405,7 @@ int signal_send(process_t *target, uint32_t signal)
     }
 
     // Check if process is valid and not zombie
-    if (target->state == PROC_STATE_ZOMBIE || target->state == PROC_STATE_TERMINATED)
+    if (target->state == PROCESS_STATE_ZOMBIE || target->state == PROCESS_STATE_TERMINATED)
     {
         return -OR_ESRCH; // No such process
     }
@@ -1415,13 +1417,13 @@ int signal_send(process_t *target, uint32_t signal)
         if (signal == SIGKILL)
         {
             // Terminate the process immediately
-            target->state = PROC_STATE_TERMINATED;
+            target->state = PROCESS_STATE_TERMINATED;
             target->exit_code = 128 + signal; // Convention: 128 + signal number
 
             // Wake up parent if waiting
-            if (target->parent && target->parent->state == PROC_STATE_WAITING)
+            if (target->parent && target->parent->state == PROCESS_STATE_WAITING)
             {
-                target->parent->state = PROC_STATE_READY;
+                target->parent->state = PROCESS_STATE_READY;
                 scheduler_add_thread_to_rq(target->parent->main_thread);
             }
 
@@ -1432,7 +1434,7 @@ int signal_send(process_t *target, uint32_t signal)
         else if (signal == SIGSTOP)
         {
             // Stop the process
-            target->state = PROC_STATE_STOPPED;
+            target->state = PROCESS_STATE_STOPPED;
             kdebug("Process PID %llu stopped by SIGSTOP",
                    (unsigned long long)target->pid);
             return OR_OK;
@@ -1443,9 +1445,9 @@ int signal_send(process_t *target, uint32_t signal)
     target->pending_signals |= (1ULL << signal);
 
     // If process is sleeping, wake it up to handle the signal
-    if (target->state == PROC_STATE_SLEEPING)
+    if (target->state == PROCESS_STATE_SLEEPING)
     {
-        target->state = PROC_STATE_READY;
+        target->state = PROCESS_STATE_READY;
         if (target->main_thread)
         {
             scheduler_add_thread_to_rq(target->main_thread);
@@ -1481,7 +1483,7 @@ void process_handle_signals(process_t *process)
             case SIGINT:
             case SIGQUIT:
                 // Default action: terminate process
-                process->state = PROC_STATE_TERMINATED;
+                process->state = PROCESS_STATE_TERMINATED;
                 process->exit_code = 128 + sig;
                 kdebug("Process PID %llu terminated by signal %u",
                        (unsigned long long)process->pid, sig);
@@ -1495,9 +1497,9 @@ void process_handle_signals(process_t *process)
 
             case SIGCONT:
                 // Continue a stopped process
-                if (process->state == PROC_STATE_STOPPED)
+                if (process->state == PROCESS_STATE_STOPPED)
                 {
-                    process->state = PROC_STATE_READY;
+                    process->state = PROCESS_STATE_READY;
                     if (process->main_thread)
                     {
                         scheduler_add_thread_to_rq(process->main_thread);
@@ -1516,7 +1518,7 @@ void process_handle_signals(process_t *process)
 
             default:
                 // Default action for most signals: terminate
-                process->state = PROC_STATE_TERMINATED;
+                process->state = PROCESS_STATE_TERMINATED;
                 process->exit_code = 128 + sig;
                 kdebug("Process PID %llu terminated by signal %u (default action)",
                        (unsigned long long)process->pid, sig);
@@ -1539,7 +1541,7 @@ void thread_exit(int exit_code)
         if (current->parent_process)
         {
             current->parent_process->exit_code = exit_code;
-            current->parent_process->state = PROC_STATE_ZOMBIE;
+            current->parent_process->state = PROCESS_STATE_ZOMBIE;
         }
     }
 

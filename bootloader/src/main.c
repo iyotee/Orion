@@ -1,5 +1,5 @@
-#include "../../include/efi.h"
-#include "../../include/orion-boot-protocol.h"
+#include "../../shared/efi.h"
+#include "../../shared/orion-boot-protocol.h"
 
 // Orion OS Bootloader Configuration
 #define ORION_BOOTLOADER_VERSION L"1.0.0"
@@ -59,13 +59,13 @@ EFI_STATUS prepare_orion_boot_info(struct orion_boot_info **boot_info, UINTN *in
     bl_info->header.type = ORION_INFO_BOOTLOADER;
     bl_info->header.size = sizeof(struct orion_bootloader_info);
     // Copy strings using simple loops
-    for (int i = 0; i < 12 && "Orion v2.0"[i]; i++)
+    for (int i = 0; i < 12 && "Orion v1.0"[i]; i++)
     {
-        bl_info->name[i] = "Orion v2.0"[i];
+        bl_info->name[i] = "Orion v1.0"[i];
     }
-    for (int i = 0; i < 6 && "2.0.0"[i]; i++)
+    for (int i = 0; i < 6 && "1.0.0"[i]; i++)
     {
-        bl_info->version[i] = "2.0.0"[i];
+        bl_info->version[i] = "1.0.0"[i];
     }
     bl_info->load_time = 50;    // 50ms
     bl_info->features = 0x0001; // Basic features
@@ -273,6 +273,6 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE handle, EFI_SYSTEM_TABLE *st)
         return Status;
     }
 
-    Print(L"🎯 Orion Bootloader v2.0 - Mission accomplished! 🎯\r\n");
+    Print(L"🎯 Orion Bootloader v1.0 - Mission accomplished! 🎯\r\n");
     return EFI_SUCCESS;
 }

@@ -62,7 +62,7 @@
 #define SYS_RANDOM 52    // Get entropy
 
 // Maximum number of system calls
-#define MAX_SYSCALLS 60
+#include <orion/limits.h>
 
 // Structures for system calls
 

@@ -17,7 +17,7 @@
 use orion_driver::{
     NetworkDriver, DeviceInfo, DriverError, DriverInfo, DriverResult, OrionDriver,
     MmioAccessor, MmioPermissions, LinkStatus, NetworkStats, BusType,
-    MessageLoop, ReceivedMessage, IoRequestType,
+    MessageLoop, ReceivedMessage, IoRequestType, virtio_constants::*,
 };
 
 /// VirtIO Network Device Driver
@@ -36,29 +36,7 @@ pub struct VirtioNetDriver {
     tx_queue_memory: Option<*mut u8>,
 }
 
-// VirtIO Net register offsets
-const VIRTIO_MMIO_MAGIC_VALUE: usize = 0x000;
-const VIRTIO_MMIO_VERSION: usize = 0x004;
-const VIRTIO_MMIO_DEVICE_ID: usize = 0x008;
-const VIRTIO_MMIO_VENDOR_ID: usize = 0x00c;
-const VIRTIO_MMIO_DEVICE_FEATURES: usize = 0x010;
-const VIRTIO_MMIO_DRIVER_FEATURES: usize = 0x020;
-const VIRTIO_MMIO_QUEUE_SEL: usize = 0x030;
-const VIRTIO_MMIO_QUEUE_NUM_MAX: usize = 0x034;
-const VIRTIO_MMIO_QUEUE_NUM: usize = 0x038;
-const VIRTIO_MMIO_QUEUE_READY: usize = 0x044;
-const VIRTIO_MMIO_QUEUE_NOTIFY: usize = 0x050;
-const VIRTIO_MMIO_INTERRUPT_STATUS: usize = 0x060;
-const VIRTIO_MMIO_INTERRUPT_ACK: usize = 0x064;
-const VIRTIO_MMIO_STATUS: usize = 0x070;
-const VIRTIO_MMIO_CONFIG: usize = 0x100;
-
-// VirtIO status register bits
-const VIRTIO_STATUS_ACKNOWLEDGE: u32 = 1;
-const VIRTIO_STATUS_DRIVER: u32 = 2;
-const VIRTIO_STATUS_DRIVER_OK: u32 = 4;
-const VIRTIO_STATUS_FEATURES_OK: u32 = 8;
-const VIRTIO_STATUS_FAILED: u32 = 128;
+// VirtIO constants are imported from orion_driver::virtio_constants - no duplication
 
 // VirtIO Net features
 const VIRTIO_NET_F_CSUM: u64 = 1 << 0;

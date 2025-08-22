@@ -4,8 +4,7 @@
 #include <orion/types.h>
 
 // IPC Constants
-#define IPC_MAX_MESSAGE_SIZE (64 * 1024) // 64KB max per message
-#define IPC_MAX_CAPABILITIES 16          // Max capabilities per message
+#include <orion/limits.h>
 #define IPC_TIMEOUT_INFINITE 0xFFFFFFFFFFFFFFFFULL
 
 // IPC message flags

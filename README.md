@@ -1,6 +1,6 @@
 <div align="center">
 
-# <img src="orion_logo.png" alt="Orion OS Logo" width="200"/>
+# <img src="orion_logo.png" alt="Orion OS Logo" width="350"/>
 
 # Orion Operating System
 
@@ -45,7 +45,7 @@
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                         Hybrid Micro-Kernel Core (C11)                      │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                    Multi-ISA Hardware Abstraction Layer                     │
+│                      Multi-ISA Hardware Abstraction Layer                   │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 

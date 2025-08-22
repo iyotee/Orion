@@ -14,13 +14,7 @@
 #define ORION_THREAD_H
 
 #include <orion/types.h>
-
-// Forward declarations
-struct process;
-struct thread;
-
-// Thread structure (defined in scheduler.h)
-typedef struct thread thread_t;
+#include <orion/structures.h>
 
 // ========================================
 // THREAD CREATION AND MANAGEMENT

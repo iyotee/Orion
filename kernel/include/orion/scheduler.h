@@ -16,39 +16,18 @@
 
 #include <orion/types.h>
 #include <orion/mm.h>
+#include <orion/forward_decls.h>
+#include <orion/spinlock.h>
 
 // ========================================
 // FORWARD DECLARATIONS
 // ========================================
 
-typedef struct vm_space vm_space_t;
-
 // ========================================
 // ENUMS AND CONSTANTS
 // ========================================
 
-// Process states
-typedef enum
-{
-    PROC_STATE_READY,
-    PROC_STATE_RUNNING,
-    PROC_STATE_BLOCKED,
-    PROC_STATE_WAITING,
-    PROC_STATE_SLEEPING,
-    PROC_STATE_STOPPED,
-    PROC_STATE_ZOMBIE,
-    PROC_STATE_TERMINATED
-} process_state_t;
-
-// Thread states
-typedef enum
-{
-    THREAD_STATE_READY,
-    THREAD_STATE_RUNNING,
-    THREAD_STATE_BLOCKED,
-    THREAD_STATE_ZOMBIE,
-    THREAD_STATE_TERMINATED
-} thread_state_t;
+// Process and thread states are defined in process.h and thread.h respectively
 
 // Handle types
 typedef enum
@@ -60,8 +39,6 @@ typedef enum
     HANDLE_TYPE_MEMORY,
     HANDLE_TYPE_TIMER
 } handle_type_t;
-
-#define MAX_HANDLES 256
 
 // ========================================
 // STRUCTURE DEFINITIONS
@@ -75,97 +52,6 @@ typedef struct
     uint32_t permissions;
     uint32_t ref_count;
 } handle_t;
-
-// Maximum number of CPUs
-#define MAX_CPUS 64
-
-// Complete thread structure
-typedef struct thread
-{
-    uint64_t tid;              // Thread ID
-    thread_state_t state;      // Thread state
-    uint64_t virtual_runtime;  // Virtual runtime for CFS
-    uint64_t actual_runtime;   // Actual runtime
-    uint64_t last_switch_time; // Last context switch time
-    int priority;              // Priority (-20 to +19)
-    uint64_t nice_weight;      // Weight for CFS
-
-    // CPU context (saved during context switches)
-    uint64_t rsp;           // Stack pointer
-    uint64_t rip;           // Instruction pointer
-    uint64_t rflags;        // Flags register
-    uint64_t rbp;           // Base pointer
-    uint64_t registers[16]; // General purpose registers
-
-    // Stack and memory
-    uint64_t stack_base; // Stack base address
-    uint64_t stack_size; // Stack size
-    uint64_t user_stack; // Userland stack
-
-    // Scheduler links
-    struct thread *next;      // Queue list
-    struct thread *prev;      // Queue list
-    struct thread *rb_left;   // Red-black tree
-    struct thread *rb_right;  // Red-black tree
-    struct thread *rb_parent; // Red-black tree
-    int rb_color;             // Red-black tree color
-
-    // Parent process
-    struct process *parent_process; // Owning process
-
-    // Timing and sleep
-    uint64_t sleep_until;  // Wake up time if sleeping
-    uint64_t cpu_affinity; // CPU affinity (bitmap)
-} thread_t;
-
-// Complete process structure
-typedef struct process
-{
-    uint64_t pid;          // Process ID
-    process_state_t state; // Process state
-    int exit_code;         // Exit code
-
-    // Memory management
-    vm_space_t *vm_space; // Virtual address space
-
-    // Threads
-    thread_t *main_thread; // Main thread
-    thread_t *threads;     // Thread list
-    uint32_t thread_count; // Number of threads
-
-    // Hierarchy
-    struct process *parent;       // Parent process
-    struct process *children;     // Children
-    struct process *next_sibling; // Next sibling
-
-    // Handles and resources
-    handle_t handles[MAX_HANDLES]; // Handle table
-
-    // ELF information
-    uint64_t entry_point; // Entry point
-    uint64_t brk;         // End of heap
-
-    // Memory layout
-    uint64_t code_base;  // Code segment base
-    uint64_t code_size;  // Code segment size
-    uint64_t data_base;  // Data segment base
-    uint64_t data_size;  // Data segment size
-    uint64_t stack_base; // Stack base
-    uint64_t stack_size; // Stack size
-    uint64_t heap_start; // Heap start
-    uint64_t stack_top;  // Stack top
-
-    // Process arguments
-    char **argv; // Command line arguments
-    char **envp; // Environment variables
-
-    // Signal handling
-    uint64_t pending_signals; // Pending signals bitmap
-
-    // Timing
-    uint64_t creation_time;  // Creation time
-    uint64_t cpu_time_total; // Total CPU time
-} process_t;
 
 // Per-CPU runqueue for SMP
 typedef struct cpu_runqueue

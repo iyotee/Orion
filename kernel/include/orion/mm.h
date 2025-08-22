@@ -88,12 +88,7 @@ void *krealloc(void *ptr, uint64_t new_size);
 
 // Memory utility macros
 #define KMALLOC(type) ((type *)kmalloc(sizeof(type)))
-#define KFREE(ptr)    \
-    do                \
-    {                 \
-        kfree(ptr);   \
-        (ptr) = NULL; \
-    } while (0)
+// Use kfree() directly instead of KFREE macro for consistency
 
 // VMM flags
 #define VM_FLAG_READ (1 << 0)
