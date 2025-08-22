@@ -94,7 +94,7 @@ if errorlevel 1 (
 
     REM Push to GitHub
     echo [INFO] Pushing to GitHub...
-    git push origin main
+    git push origin master
 ) else (
     echo [WARNING] No changes detected, Wiki is already up to date
 )
