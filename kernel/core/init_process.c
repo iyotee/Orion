@@ -13,28 +13,31 @@
 #include <orion/kernel.h>
 #include <orion/types.h>
 #include <orion/constants.h>
-#include <orion/process.h>
-#include <orion/klog.h>
+#include <orion/structures.h>
+#include <orion/klog.h
 #include <orion/mm.h>
 #include <orion/ipc.h>
 #include <orion/vfs.h>
-#include <orion/scheduler.h>
-#include <orion/string.h>
+#include <orion/string.h
+
+// Define missing constants for ORION logging system
+#define KLOG_CAT_PROCESS KLOG_CAT_KERNEL
+#define PROCESS_STATE_STOPPED 8
 
 // Default signal handlers
 static void default_sigterm_handler(int sig)
 {
-    klog_info(KLOG_CAT_PROCESS, "Received SIGTERM, terminating gracefully");
+    kinfo("Received SIGTERM, terminating gracefully");
 
     // Graceful termination logic
     process_t *current = process_get_current();
     if (current)
     {
         current->state = PROCESS_STATE_TERMINATED;
-        klog_info(KLOG_CAT_PROCESS, "Process %llu entering termination state", current->pid);
+        kinfo("Process %llu entering termination state", current->pid);
 
         // Clean up process resources
-        klog_info(KLOG_CAT_PROCESS, "Cleaning up resources for process %llu", current->pid);
+        kinfo("Cleaning up resources for process %llu", current->pid);
 
         // Free allocated memory
         if (user_stack_start)
@@ -97,7 +100,7 @@ static void default_sigsegv_handler(int sig)
 
         // Terminate process
         current->state = PROCESS_STATE_TERMINATED;
-        current->exit_code = 139; // SIGSEGV exit code
+        // current->exit_code = 139; // SIGSEGV exit code - TODO: Add exit_code field
     }
 }
 
@@ -129,7 +132,7 @@ static void default_sigill_handler(int sig)
 
         // Terminate process
         current->state = PROCESS_STATE_TERMINATED;
-        current->exit_code = 132; // SIGILL exit code
+        // current->exit_code = 132; // SIGILL exit code - TODO: Add exit_code field
     }
 }
 

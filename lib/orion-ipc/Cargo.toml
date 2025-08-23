@@ -1,0 +1,15 @@
+[package]
+name = "orion-ipc"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jeremy Noverraz <jeremy@orion-os.dev>"]
+description = "IPC library for Orion OS"
+license = "MIT"
+keywords = ["orion", "ipc", "communication"]
+categories = ["no-std", "embedded", "os"]
+
+[dependencies]
+
+[lib]
+name = "orion_ipc"
+path = "src/lib.rs"

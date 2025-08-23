@@ -1,0 +1,17 @@
+[package]
+name = "orion-net-server"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jeremy Noverraz <jeremy@orion-os.dev>"]
+description = "Network server for Orion OS"
+license = "MIT"
+keywords = ["orion", "server", "network", "tcp", "ip"]
+categories = ["no-std", "embedded", "os"]
+
+[dependencies]
+orion-ipc = { path = "../../lib/orion-ipc" }
+orion-cap = { path = "../../lib/orion-cap" }
+
+[[bin]]
+name = "net-server"
+path = "src/main.rs"

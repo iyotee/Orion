@@ -14,7 +14,7 @@
 #include <orion/kernel.h>
 #include <orion/types.h>
 #include <orion/mm.h>
-#include <orion/scheduler.h>
+#include <orion/structures.h
 
 // Capability constants (if not defined elsewhere)
 #ifndef CAP_READ

@@ -69,6 +69,12 @@
 - **Storage**: 20GB minimum, SSD recommended
 - **Network**: Internet connection for updates and package installation
 
+#### **Storage Framework Requirements**
+- **Storage**: Support for LVM, RAID, NVME, SATA, SCSI, and network storage
+- **Memory**: Additional RAM for multi-layer caching (4GB+ recommended)
+- **Security**: Hardware support for encryption acceleration (AES-NI, etc.)
+- **Performance**: SSD/NVME storage for optimal caching performance
+
 #### **Recommended Requirements**
 - **CPU**: Modern multi-core processor with hardware security extensions
 - **RAM**: 16GB or more for optimal performance

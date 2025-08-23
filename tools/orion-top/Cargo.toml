@@ -1,0 +1,15 @@
+[package]
+name = "orion-top"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jeremy Noverraz <jeremy@orion-os.dev>"]
+description = "System monitoring tool for Orion OS"
+license = "MIT"
+keywords = ["orion", "tool", "monitoring", "top"]
+categories = ["no-std", "embedded", "os"]
+
+[dependencies]
+
+[[bin]]
+name = "orion-top"
+path = "src/main.rs"

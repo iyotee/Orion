@@ -10,65 +10,49 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(ORION_ARCH "x86_64" CACHE STRING "Target architecture (x86_64 or aarch64)")
 set_property(CACHE ORION_ARCH PROPERTY STRINGS "x86_64" "aarch64")
 
-# Compiler configuration (Clang required)
-set(CMAKE_C_COMPILER clang)
-set(CMAKE_ASM_COMPILER clang)
-set(CMAKE_LINKER lld)
+# Linux/GCC configuration
+set(CMAKE_ASM_COMPILER as)
+set(CMAKE_LINKER ld)
 
-# Compilation flags for freestanding kernel
+# GCC compilation flags for freestanding kernel
 set(KERNEL_CFLAGS
+    -std=c11
     -ffreestanding
+    -fno-builtin
     -fno-stack-protector
-    -fno-stack-check
-    -fno-lto
-    -fno-PIE
-    -fno-PIC
-    -mno-80387
-    -mno-mmx
-    -mno-3dnow
-    -mno-sse
-    -mno-sse2
+    -fno-pie
     -mno-red-zone
-    -mcmodel=large
+    -mcmodel=kernel
     -Wall
     -Wextra
     -Werror
-    -pedantic
-    -Wno-unused-parameter
+    -O2
+    -g
+    -DDEBUG
+    -DORION_KERNEL_BUILD=1
+    -DORION_ARCH_${ORION_ARCH}=1
 )
 
-# Architecture-specific flags
-if(ORION_ARCH STREQUAL "x86_64")
-    list(APPEND KERNEL_CFLAGS
-        -target x86_64-unknown-none
-        -mno-red-zone
-        -mcmodel=large
-    )
-    set(KERNEL_LDFLAGS
-        -target x86_64-unknown-none
-        -nostdlib
-        -Wl,-n
-        -Wl,--gc-sections
-        -Wl,-no-pie
-        -static
-    )
-elseif(ORION_ARCH STREQUAL "aarch64")
-    list(APPEND KERNEL_CFLAGS
-        -target aarch64-unknown-none
-    )
-    set(KERNEL_LDFLAGS
-        -target aarch64-unknown-none
-        -nostdlib
-        -Wl,--gc-sections
-    )
-endif()
+# Assembly flags
+set(KERNEL_ASFLAGS
+    --64
+    -g
+)
 
-# Configuration Debug/Release
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    list(APPEND KERNEL_CFLAGS -O0 -g3 -DDEBUG)
-else()
-    list(APPEND KERNEL_CFLAGS -O2 -DNDEBUG)
-endif()
+# Linker flags
+set(KERNEL_LDFLAGS
+    -melf_x86_64
+    -T${CMAKE_CURRENT_SOURCE_DIR}/kernel/arch/${ORION_ARCH}/linker.ld
+    -nostdlib
+    -znoexecstack
+    -zrelro
+    -znow
+)
+
+# Set compiler flags
+set(CMAKE_C_FLAGS "${KERNEL_CFLAGS}")
+set(CMAKE_ASM_FLAGS "${KERNEL_ASFLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${KERNEL_LDFLAGS}")
 
 # Include directories
 include_directories(kernel/include)

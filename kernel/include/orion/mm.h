@@ -2,17 +2,13 @@
 #define ORION_MM_H
 
 #include <orion/types.h>
+#include <orion/forward_decls.h>
 
 // Types for memory management
 
-// Structure for virtual memory space
-typedef struct vm_space
-{
-    uint64_t pml4_phys;  // Physical address of PML4
-    uint64_t start_addr; // Start of virtual space
-    uint64_t end_addr;   // End of virtual space
-    bool is_kernel;      // Kernel or userland space
-} vm_space_t;
+// Forward declarations for memory management types
+typedef struct vm_space vm_space_t;
+typedef struct page_ref page_ref_t;
 
 // Structure for heap blocks
 typedef struct heap_block
@@ -105,14 +101,15 @@ void *krealloc(void *ptr, uint64_t new_size);
 #define PAGE_FLAG_ACCESSED (1 << 5)
 #define PAGE_FLAG_DIRTY (1 << 6)
 #define PAGE_FLAG_GLOBAL (1 << 8)
-#define PAGE_FLAG_COW (1 << 9)    // Copy-on-Write flag
+#define PAGE_FLAG_COW (1 << 9)     // Copy-on-Write flag
 #define PAGE_FLAG_SHARED (1 << 10) // Shared page flag
 
 // COW-specific page management
-typedef struct page_ref {
-    atomic32_t ref_count;     // Reference counter for shared pages
-    uint64_t physical_addr;   // Physical address
-    spinlock_t lock;          // Lock for atomic operations
+typedef struct page_ref
+{
+    atomic32_t ref_count;   // Reference counter for shared pages
+    uint64_t physical_addr; // Physical address
+    spinlock_t lock;        // Lock for atomic operations
 } page_ref_t;
 
 #endif // ORION_MM_H

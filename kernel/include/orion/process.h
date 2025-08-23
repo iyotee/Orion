@@ -1,10 +1,8 @@
 /*
  * Orion Operating System - Process Management Header
  *
- * Process creation, management, and lifecycle declarations.
- *
- * Developed by Jeremy Noverraz (1988-2025)
- * August 2025, Lausanne, Switzerland
+ * Process and thread management structures and functions.
+ * Provides the core process management interface.
  *
  * Copyright (c) 2024-2025 Orion OS Project
  * License: MIT
@@ -14,72 +12,65 @@
 #define ORION_PROCESS_H
 
 #include <orion/types.h>
-#include <orion/structures.h>
+#include <orion/forward_decls.h>
 
-// ========================================
-// PROCESS CREATION AND MANAGEMENT
-// ========================================
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-/**
- * Create a new process
- *
- * @param name Process name
- * @param entry_point Entry point address
- * @param stack_pointer Initial stack pointer
- * @return Pointer to created process or NULL on failure
- */
-process_t *process_create(const char *name, uint64_t entry_point, uint64_t stack_pointer);
+    // Process states
+    typedef enum
+    {
+        PROCESS_STATE_NEW = 0,
+        PROCESS_STATE_READY,
+        PROCESS_STATE_RUNNING,
+        PROCESS_STATE_WAITING,
+        PROCESS_STATE_TERMINATED,
+        PROCESS_STATE_ZOMBIE
+    } process_state_t;
 
-/**
- * Start a process
- *
- * @param process Process to start
- * @return 0 on success, negative error code on failure
- */
-int process_start(process_t *process);
+    // Process structure is defined in structures.h
+    // This file only contains forward declarations and function prototypes
 
-/**
- * Destroy a process
- *
- * @param process Process to destroy
- */
-void process_destroy(process_t *process);
+    // Thread states
+    typedef enum
+    {
+        THREAD_STATE_NEW = 0,
+        THREAD_STATE_READY,
+        THREAD_STATE_RUNNING,
+        THREAD_STATE_WAITING,
+        THREAD_STATE_TERMINATED
+    } thread_state_t;
 
-/**
- * Find process by PID
- *
- * @param pid Process ID to find
- * @return Pointer to process or NULL if not found
- */
-process_t *process_find(uint64_t pid);
+    // Thread structure is defined in structures.h
+    // This file only contains forward declarations and function prototypes
 
-/**
- * Get current process
- *
- * @return Pointer to current process or NULL
- */
-process_t *process_get_current(void);
+    // Process management functions
+    process_t *process_create(const char *name, uint64_t priority);
+    void process_destroy(process_t *process);
+    int process_start(process_t *process);
+    int process_stop(process_t *process);
+    process_t *process_get_by_pid(pid_t pid);
+    process_t *process_get_current(void);
+    pid_t process_get_current_pid(void);
 
-/**
- * Set process arguments
- *
- * @param process Process to set arguments for
- * @param argv Argument vector
- * @param envp Environment vector
- * @return 0 on success, negative error code on failure
- */
-int process_set_args(process_t *process, char *const argv[], char *const envp[]);
+    // Thread management functions
+    thread_t *thread_create(process_t *process, void *entry_point, void *stack, size_t stack_size);
+    void thread_destroy(thread_t *thread);
+    int thread_start(thread_t *thread);
+    int thread_stop(thread_t *thread);
+    thread_t *thread_get_by_tid(tid_t tid);
+    thread_t *thread_get_current(void);
+    tid_t thread_get_current_tid(void);
 
-/**
- * Get process count
- *
- * @return Number of active processes
- */
-uint32_t process_get_count(void);
+    // Process/Thread scheduling
+    void scheduler_add_thread_to_rq(thread_t *thread);
+    void scheduler_remove_thread_from_rq(thread_t *thread);
+    thread_t *scheduler_get_next_thread(void);
 
-/**
- * Initialize process management system
- */
-void process_init(void);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ORION_PROCESS_H

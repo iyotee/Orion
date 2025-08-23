@@ -1,64 +1,63 @@
+/*
+ * Orion Operating System - Capability System Header
+ *
+ * Capability-based security system declarations.
+ *
+ * Developed by Jeremy Noverraz (1988-2025)
+ * August 2025, Lausanne, Switzerland
+ *
+ * Copyright (c) 2024-2025 Orion OS Project
+ * License: MIT
+ */
+
 #ifndef ORION_CAPABILITIES_H
 #define ORION_CAPABILITIES_H
 
 #include <orion/types.h>
 
-// Object types for capabilities
-typedef enum
+#ifdef __cplusplus
+extern "C"
 {
-    CAP_TYPE_NONE = 0,
-    CAP_TYPE_MEMORY,
-    CAP_TYPE_IPC_PORT,
-    CAP_TYPE_PROCESS,
-    CAP_TYPE_THREAD,
-    CAP_TYPE_FILE,
-    CAP_TYPE_DEVICE,
-    CAP_TYPE_TIMER,
-} cap_type_t;
+#endif
+
+    // Capability types
+    typedef enum
+    {
+        CAP_TYPE_NONE = 0,
+        CAP_TYPE_READ,
+        CAP_TYPE_WRITE,
+        CAP_TYPE_EXECUTE,
+        CAP_TYPE_DELETE,
+        CAP_TYPE_MOUNT,
+        CAP_TYPE_IPC,
+        CAP_TYPE_NETWORK,
+        CAP_TYPE_DEVICE,
+        CAP_TYPE_SYSTEM,
+        CAP_TYPE_FILE
+    } cap_type_t;
 
 // Capability rights
-#define CAP_RIGHT_READ (1ULL << 0)
-#define CAP_RIGHT_WRITE (1ULL << 1)
-#define CAP_RIGHT_EXEC (1ULL << 2)
-#define CAP_RIGHT_GRANT (1ULL << 3)
-#define CAP_RIGHT_REVOKE (1ULL << 4)
-#define CAP_RIGHT_DELETE (1ULL << 5)
-#define CAP_RIGHT_SEND (1ULL << 6)  // For IPC
-#define CAP_RIGHT_RECV (1ULL << 7)  // For IPC
-#define CAP_RIGHT_MAP (1ULL << 8)   // For memory
-#define CAP_RIGHT_UNMAP (1ULL << 9) // For memory
+#define CAP_READ (1 << 0)
+#define CAP_WRITE (1 << 1)
+#define CAP_EXECUTE (1 << 2)
+#define CAP_DELETE (1 << 3)
 
-// Capability system functions
-void capabilities_init(void);
+    // Capability structure
+    typedef struct
+    {
+        cap_type_t type;
+        uint64_t rights;
+        uint64_t target;
+        uint64_t owner_pid;
+    } or_cap_t;
 
-// Create a new capability
-or_cap_t cap_create(cap_type_t type, uint64_t object_id,
-                    uint64_t rights, uint64_t owner_pid);
+    // Capability functions
+    or_cap_t cap_create(cap_type_t type, uint64_t rights, uint64_t target, uint64_t owner_pid);
+    bool cap_check_rights(or_cap_t cap, uint64_t rights, uint64_t target);
+    void cap_destroy(or_cap_t cap);
 
-// Check capability rights
-bool cap_check_rights(or_cap_t cap_id, uint64_t required_rights,
-                      uint64_t caller_pid);
-
-// Grant/revoke rights
-int cap_grant(or_cap_t cap_id, uint64_t target_pid,
-              uint64_t rights, uint64_t caller_pid);
-int cap_revoke(or_cap_t cap_id, uint64_t target_pid,
-               uint64_t rights, uint64_t caller_pid);
-
-// Destroy a capability
-void cap_destroy(or_cap_t cap_id);
-
-// Macros for common checks
-#define CAP_CHECK_READ(cap, pid) \
-    cap_check_rights(cap, CAP_RIGHT_READ, pid)
-
-#define CAP_CHECK_WRITE(cap, pid) \
-    cap_check_rights(cap, CAP_RIGHT_WRITE, pid)
-
-#define CAP_CHECK_SEND(cap, pid) \
-    cap_check_rights(cap, CAP_RIGHT_SEND, pid)
-
-#define CAP_CHECK_RECV(cap, pid) \
-    cap_check_rights(cap, CAP_RIGHT_RECV, pid)
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ORION_CAPABILITIES_H

@@ -13,6 +13,10 @@
 
 #include <orion/klog.h>
 
+// Define missing constants for testing
+#define KLOG_CAT_MEMORY KLOG_CAT_KERNEL
+#define KLOG_CAT_PROCESS KLOG_CAT_KERNEL
+
 // Test function to verify logging system compilation
 void test_kernel_logging(void)
 {

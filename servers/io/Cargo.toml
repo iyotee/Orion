@@ -1,0 +1,17 @@
+[package]
+name = "orion-io-server"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jeremy Noverraz <jeremy@orion-os.dev>"]
+description = "I/O server for Orion OS"
+license = "MIT"
+keywords = ["orion", "server", "io", "input", "output"]
+categories = ["no-std", "embedded", "os"]
+
+[dependencies]
+orion-ipc = { path = "../../lib/orion-ipc" }
+orion-cap = { path = "../../lib/orion-cap" }
+
+[[bin]]
+name = "io-server"
+path = "src/main.rs"

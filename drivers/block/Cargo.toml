@@ -23,3 +23,19 @@ path = "src/nvme.rs"
 [[bin]]
 name = "ahci"
 path = "src/ahci.rs"
+
+[[bin]]
+name = "lvm"
+path = "src/lvm.rs"
+
+[[bin]]
+name = "deduplication"
+path = "src/deduplication.rs"
+
+[[bin]]
+name = "encryption"
+path = "src/encryption.rs"
+
+[[bin]]
+name = "compression"
+path = "src/compression.rs"

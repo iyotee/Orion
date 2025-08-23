@@ -59,6 +59,12 @@
 - **Rust** for drivers and userland services
 - **Python** for build tools and automation
 
+#### **Storage Framework Development**
+- **Rust** for all storage drivers and framework components
+- **Cross-architecture compilation** for all supported platforms
+- **Performance-focused development** with benchmarking requirements
+- **Security-first approach** with formal verification goals
+
 #### **Development Tools**
 - **clang-tidy** for static analysis and code quality
 - **CBMC** for bounded model checking

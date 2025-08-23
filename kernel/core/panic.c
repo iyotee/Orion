@@ -2,6 +2,7 @@
 #include <orion/kernel.h>
 #include <orion/types.h>
 #include <orion/klog.h>
+#include <orion/structures.h
 
 // Panic state
 static bool panic_in_progress = false;

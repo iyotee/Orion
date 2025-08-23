@@ -37,6 +37,8 @@
 - **ARCHITECTURE.md** - System architecture and design
 - **DEVELOPMENT.md** - Development guide and standards
 - **USER_GUIDE.md** - User and admin documentation
+- **STORAGE_FRAMEWORK.md** - Storage framework and block drivers documentation
+- **STORAGE_FRAMEWORK.md** - Storage framework and block drivers documentation
 
 #### **Project Files**
 - **[../README.md](../README.md)** - Project overview and vision
@@ -135,6 +137,13 @@
 - **Integrated debugging** and profiling tools
 - **Performance optimization** guides and tools
 - **Documentation** and examples for all APIs
+
+#### **Storage Framework**
+- **Comprehensive block driver ecosystem** with 14+ specialized drivers
+- **Advanced storage features**: LVM, RAID, deduplication, encryption, compression
+- **Multi-layer caching system** with intelligent eviction policies
+- **Storage optimization engine** with compression and deduplication
+- **Cross-architecture storage compatibility** for all supported platforms
 
 #### **IDE Integration**
 - **VSCode, CLion, Vim plugins** with Orion-specific features

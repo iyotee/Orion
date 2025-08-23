@@ -12,11 +12,11 @@
  */
 
 #include <orion/klog.h>
-#include <orion/string.h>
+#include <orion/logging.h>
 #include <orion/console.h>
 #include <orion/time.h>
-#include <orion/process.h>
-#include <orion/mm.h>
+#include <orion/structures.h>
+#include <orion/mm.h
 #include <stdarg.h>
 
 // Global kernel logger context
@@ -28,7 +28,7 @@ static uint8_t g_default_level = KLOG_INFO;
 // Emergency logging buffer (works even when system is unstable)
 static char g_emergency_buffer[1024];
 static size_t g_emergency_head = 0;
-static spinlock_t g_emergency_lock = SPINLOCK_INIT;
+static spinlock_t g_emergency_lock = {0};
 
 // Forward declarations
 static int klog_write_to_buffer(klog_buffer_t *buffer, const klog_entry_t *entry);

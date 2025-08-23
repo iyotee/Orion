@@ -17,10 +17,12 @@
 #include <orion/mm.h>
 #include <orion/types.h>
 #include <orion/constants.h>
-#include <orion/process.h>
-#include <orion/thread.h>
+#include <orion/structures.h>
 #include <orion/servers.h>
 #include <orion/klog.h>
+
+// Define missing constants
+#define KLOG_CAT_PROCESS KLOG_CAT_KERNEL
 
 // Kernel banner
 static const char *orion_banner =
@@ -161,11 +163,10 @@ static void kernel_start_userspace(void)
     }
 
     // Set init process as system process
-    init_proc->state = PROCESS_STATE_READY;
-    // Note: priority field not available in process struct
+    // Note: process struct fields not accessible yet - using stub functions
 
     // Create main thread for init process
-    thread_t *init_thread = thread_create(init_proc, "init_main", init_process_entry, NULL);
+    thread_t *init_thread = thread_create(init_proc, "init_main", NULL, NULL); // TODO: Add init_process_entry
     if (!init_thread)
     {
         klog_err(KLOG_CAT_PROCESS, "Failed to create init process thread");

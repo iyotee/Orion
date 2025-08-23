@@ -14,6 +14,16 @@
 #ifndef ORION_TYPES_H
 #define ORION_TYPES_H
 
+// Windows-specific headers for MSVC
+#ifdef _MSC_VER
+#include <windows.h>
+// Undefine Windows macros that conflict with our definitions
+#undef CONST
+#undef min
+#undef max
+#undef offsetof
+#endif
+
 // Fundamental types for Orion
 // C11 freestanding - no dependency on libc
 
@@ -70,7 +80,7 @@ typedef enum
 #define LIKELY(x) (x)
 #define UNLIKELY(x) (x)
 #define PURE
-#define CONST
+#define ORION_CONST
 #else
 #define PACKED __attribute__((packed))
 #define ALIGNED(x) __attribute__((aligned(x)))
@@ -78,13 +88,17 @@ typedef enum
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 #define UNLIKELY(x) __builtin_expect(!!(x), 0)
 #define PURE __attribute__((pure))
-#define CONST __attribute__((const))
+#define ORION_CONST __attribute__((const))
 #endif
 
 // Utility macros
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define ORION_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define ORION_MAX(a, b) ((a) > (b) ? (a) : (b))
+
+// Legacy compatibility macros
+#define MIN(a, b) ORION_MIN(a, b)
+#define MAX(a, b) ORION_MAX(a, b)
 #define ROUND_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
 #define ROUND_DOWN(x, align) ((x) & ~((align) - 1))
 #define IS_ALIGNED(x, align) (((x) & ((align) - 1)) == 0)
@@ -202,28 +216,33 @@ struct sigevent
 // CONTAINER_OF MACRO
 // ====================================
 
-#define container_of(ptr, type, member) ({             \
-    const typeof(((type *)0)->member) *__mptr = (ptr); \
-    (type *)((char *)__mptr - offsetof(type, member)); \
+#define container_of(ptr, type, member) ({                   \
+    const typeof(((type *)0)->member) *__mptr = (ptr);       \
+    (type *)((char *)__mptr - ORION_OFFSETOF(type, member)); \
 })
-
-#define offsetof(type, member) ((size_t)&((type *)0)->member)
 
 // ====================================
 // UTILITY MACROS
 // ====================================
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#define max(a, b) ((a) > (b) ? (a) : (b))
+#define ORION_OFFSETOF(type, member) ((size_t)&((type *)0)->member)
 
-#define ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
-#define ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
+#define ORION_ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
+#define ORION_ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
 
 // IS_ALIGNED already defined line 90
 // ARRAY_SIZE already defined line 85
 
-#define likely(x) __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
+#define ORION_LIKELY(x) __builtin_expect(!!(x), 1)
+#define ORION_UNLIKELY(x) __builtin_expect(!!(x), 0)
+
+// MSVC compatibility for builtin_expect
+#ifdef _MSC_VER
+#undef ORION_LIKELY
+#undef ORION_UNLIKELY
+#define ORION_LIKELY(x) (x)
+#define ORION_UNLIKELY(x) (x)
+#endif
 
 // ====================================
 // SPINLOCK DEFINITION
@@ -256,7 +275,7 @@ static inline void spin_lock(spinlock_t *lock)
     if (!lock)
         return;
 
-    while (__atomic_test_and_set(&lock->locked, __ATOMIC_ACQUIRE))
+    while (InterlockedCompareExchange((volatile LONG *)&lock->locked, 1, 0) != 0)
     {
         arch_pause(); // CPU pause instruction for better performance
     }
@@ -266,7 +285,7 @@ static inline void spin_unlock(spinlock_t *lock)
 {
     if (!lock)
         return;
-    __atomic_clear(&lock->locked, __ATOMIC_RELEASE);
+    InterlockedExchange((volatile LONG *)&lock->locked, 0);
 }
 
 static inline bool spin_trylock(spinlock_t *lock)
@@ -274,7 +293,7 @@ static inline bool spin_trylock(spinlock_t *lock)
     if (!lock)
         return false;
 
-    return !__atomic_test_and_set(&lock->locked, __ATOMIC_ACQUIRE);
+    return InterlockedCompareExchange((volatile LONG *)&lock->locked, 1, 0) == 0;
 }
 
 // Aliases for compatibility
@@ -330,7 +349,7 @@ typedef struct
 #define __ATOMIC_ACQ_REL 4
 #define __ATOMIC_SEQ_CST 5
 
-// Atomic operations (simplified for kernel use)
+// Atomic operations (MSVC-compatible)
 static inline uint64_t atomic_load_64(const atomic64_t *ptr)
 {
     return ptr->value;
@@ -343,7 +362,8 @@ static inline void atomic_store_64(atomic64_t *ptr, uint64_t val)
 
 static inline uint64_t atomic_fetch_add_64(atomic64_t *ptr, uint64_t val)
 {
-    return __atomic_fetch_add(&ptr->value, val, __ATOMIC_SEQ_CST);
+    // MSVC-compatible atomic add
+    return InterlockedAdd64((volatile LONG64 *)&ptr->value, val) - val;
 }
 
 static inline uint32_t atomic_load_32(const atomic32_t *ptr)
@@ -358,17 +378,20 @@ static inline void atomic_store_32(atomic32_t *ptr, uint32_t val)
 
 static inline uint32_t atomic_fetch_add_32(atomic32_t *ptr, uint32_t val)
 {
-    return __atomic_fetch_add(&ptr->value, val, __ATOMIC_SEQ_CST);
+    // MSVC-compatible atomic add
+    return InterlockedAdd((volatile LONG *)&ptr->value, val) - val;
 }
 
 static inline bool atomic_compare_exchange_64(atomic64_t *ptr, uint64_t *expected, uint64_t desired)
 {
-    return __atomic_compare_exchange_n(&ptr->value, expected, desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    // MSVC-compatible compare exchange
+    return InterlockedCompareExchange64((volatile LONG64 *)&ptr->value, desired, *expected) == *expected;
 }
 
 static inline bool atomic_compare_exchange_32(atomic32_t *ptr, uint32_t *expected, uint32_t desired)
 {
-    return __atomic_compare_exchange_n(&ptr->value, expected, desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    // MSVC-compatible compare exchange
+    return InterlockedCompareExchange((volatile LONG *)&ptr->value, desired, *expected) == *expected;
 }
 
 // Additional atomic operations
@@ -389,17 +412,20 @@ static inline uint64_t atomic_fetch_add(atomic64_t *ptr, uint64_t val)
 
 static inline uint64_t atomic_fetch_sub(atomic64_t *ptr, uint64_t val)
 {
-    return __atomic_fetch_sub(&ptr->value, val, __ATOMIC_SEQ_CST);
+    // MSVC-compatible atomic subtract
+    return InterlockedAdd64((volatile LONG64 *)&ptr->value, -(LONG64)val) + val;
 }
 
 static inline uint64_t atomic_fetch_or(atomic64_t *ptr, uint64_t val)
 {
-    return __atomic_fetch_or(&ptr->value, val, __ATOMIC_SEQ_CST);
+    // MSVC-compatible atomic OR
+    return InterlockedOr64((volatile LONG64 *)&ptr->value, val);
 }
 
 static inline uint64_t atomic_fetch_and(atomic64_t *ptr, uint64_t val)
 {
-    return __atomic_fetch_and(&ptr->value, val, __ATOMIC_SEQ_CST);
+    // MSVC-compatible atomic AND
+    return InterlockedAnd64((volatile LONG64 *)&ptr->value, val);
 }
 
 static inline bool atomic_compare_exchange_strong(atomic64_t *ptr, uint64_t *expected, uint64_t desired)
@@ -434,16 +460,24 @@ void syscall_entry(void);
 void *memset(void *s, int c, size_t n);
 void *memcpy(void *dest, const void *src, size_t n);
 int memcmp(const void *s1, const void *s2, size_t n);
-size_t strlen(const char *s);
-int strcmp(const char *s1, const char *s2);
-int strncmp(const char *s1, const char *s2, size_t n);
+size_t orion_strlen(const char *s);
+int orion_strcmp(const char *s1, const char *s2);
+int orion_strncmp(const char *s1, const char *s2, size_t n);
 char *strcpy(char *dest, const char *src);
 int snprintf(char *str, size_t size, const char *format, ...);
-// va_* macros for freestanding environment
+// va_* macros for freestanding environment (only if not already defined)
+#ifndef va_list
 typedef char *va_list;
+#endif
+#ifndef va_start
 #define va_start(v, l) ((v) = (char *)&(l) + sizeof(l))
+#endif
+#ifndef va_end
 #define va_end(v) ((v) = (char *)0)
+#endif
+#ifndef va_arg
 #define va_arg(v, l) (*(l *)(((v) += sizeof(l)) - sizeof(l)))
+#endif
 
 int kvprintf(const char *format, va_list args);
 

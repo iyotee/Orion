@@ -19,6 +19,9 @@ extern "C"
 #include <orion/types.h>
 #include <orion/forward_decls.h>
 
+// System limits
+#define MAX_HANDLES 256
+
     // ========================================
     // PROCESS STRUCTURES
     // ========================================

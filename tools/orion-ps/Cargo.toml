@@ -1,0 +1,15 @@
+[package]
+name = "orion-ps"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jeremy Noverraz <jeremy@orion-os.dev>"]
+description = "Process listing tool for Orion OS"
+license = "MIT"
+keywords = ["orion", "tool", "process", "listing"]
+categories = ["no-std", "embedded", "os"]
+
+[dependencies]
+
+[[bin]]
+name = "orion-ps"
+path = "src/main.rs"

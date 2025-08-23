@@ -12,8 +12,8 @@
 
 #include <orion/kernel.h>
 #include <orion/types.h>
+#include <orion/structures.h>
 #include <orion/mm.h>
-#include <orion/scheduler.h>
 #include <orion/security.h>
 
 // ========================================
@@ -100,7 +100,7 @@ process_t *process_create(const char *name, uint64_t entry_point, uint64_t stack
     process_t *process = (process_t *)kmalloc(sizeof(process_t));
     if (!process)
     {
-        spinlock_unlock(&g_process_table_table_lock);
+        spinlock_unlock(&g_process_table_lock);
         kerror("process_create: Failed to allocate process structure");
         return NULL;
     }
@@ -132,7 +132,7 @@ process_t *process_create(const char *name, uint64_t entry_point, uint64_t stack
     process->data_base = 0;
     process->data_size = 0;
     process->heap_start = 0;
-    process->brk = 0;
+    // process->brk = 0; // TODO: Add brk field to process struct
 
     // Initialize virtual memory space
     process->vm_space = vmm_create_space();

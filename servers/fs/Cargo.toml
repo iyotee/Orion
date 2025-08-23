@@ -1,0 +1,19 @@
+[package]
+name = "orion-fs-server"
+version = "1.0.0"
+edition = "2021"
+authors = ["Jeremy Noverraz <jeremy@orion-os.dev>"]
+description = "File system server for Orion OS"
+license = "MIT"
+keywords = ["orion", "server", "filesystem", "vfs"]
+categories = ["no-std", "embedded", "os"]
+
+[dependencies]
+orion-ipc = { path = "../../lib/orion-ipc" }
+orion-cap = { path = "../../lib/orion-cap" }
+spin = "0.9"
+linked_list_allocator = "0.10"
+
+[[bin]]
+name = "fs-server"
+path = "src/main.rs"

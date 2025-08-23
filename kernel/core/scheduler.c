@@ -13,9 +13,11 @@
 
 #include <orion/types.h>
 #include <orion/mm.h>
-#include <orion/process.h>
-#include <orion/thread.h>
 #include <orion/kernel.h>
+#include <orion/structures.h
+#include <orion/constants.h>
+
+// All constants are defined in structures.h
 
 // ========================================
 // STRUCTURES AND TYPES
@@ -963,7 +965,7 @@ void scheduler_destroy_process(process_t *process)
 // UTILITIES AND STUBS
 // ========================================
 
-void handle_cleanup(handle_t *handle)
+void handle_cleanup(orion_handle_t *handle)
 {
     if (!handle || handle->type == HANDLE_TYPE_NONE)
     {

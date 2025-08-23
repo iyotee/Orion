@@ -19,15 +19,3 @@ path = "src/usb_hid.rs"
 [[bin]]
 name = "usb-storage"
 path = "src/usb_storage.rs"
-
-[[bin]]
-name = "usb-hub"
-path = "src/usb_hub.rs"
-
-[[bin]]
-name = "usb-keyboard"
-path = "src/usb_keyboard.rs"
-
-[[bin]]
-name = "usb-mouse"
-path = "src/usb_mouse.rs"

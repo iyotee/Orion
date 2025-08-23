@@ -1,19 +1,15 @@
 # Orion tools and utilities
 
-# Simple C tools
-add_executable(orion-hexdump
-    hexdump.c
-)
+# Note: Most tools are implemented in Rust via Cargo
+# This CMakeLists.txt only handles build system integration
 
-add_executable(orion-klog
-    klog.c
-)
+# Rust tools are built via Cargo in their respective directories:
+# - orion-ps: Process listing tool
+# - orion-top: System monitoring tool  
+# - orion-trace: System call tracing tool
 
-# These tools will mainly be in Rust via Cargo
-# But we can have some simple C utilities
-
-# Installation
-install(TARGETS orion-hexdump orion-klog
-    DESTINATION bin
-    COMPONENT tools
-)
+# Installation placeholder for future C tools
+# install(TARGETS 
+#     DESTINATION bin
+#     COMPONENT tools
+# )

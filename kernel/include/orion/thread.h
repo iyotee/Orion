@@ -14,89 +14,47 @@
 #define ORION_THREAD_H
 
 #include <orion/types.h>
-#include <orion/structures.h>
+#include <orion/forward_decls.h>
 
-// ========================================
-// THREAD CREATION AND MANAGEMENT
-// ========================================
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-/**
- * Create a new thread
- *
- * @param process Parent process
- * @param name Thread name
- * @param entry_point Entry point function
- * @param arg Argument passed to entry point
- * @return Pointer to created thread or NULL on failure
- */
-thread_t *thread_create(process_t *process, const char *name, void (*entry_point)(void *), void *arg);
+    // Thread creation and management
+    thread_t *thread_create(process_t *process, void *entry_point, void *stack, size_t stack_size);
+    void thread_destroy(thread_t *thread);
+    int thread_start(thread_t *thread);
+    int thread_stop(thread_t *thread);
 
-/**
- * Start a thread
- *
- * @param thread Thread to start
- * @return 0 on success, negative error code on failure
- */
-int thread_start(thread_t *thread);
+    // Thread information
+    thread_t *thread_get_by_tid(tid_t tid);
+    thread_t *thread_get_current(void);
+    tid_t thread_get_current_tid(void);
 
-/**
- * Destroy a thread
- *
- * @param thread Thread to destroy
- */
-void thread_destroy(thread_t *thread);
+    // Thread scheduling
+    void scheduler_add_thread_to_rq(thread_t *thread);
+    void scheduler_remove_thread_from_rq(thread_t *thread);
+    thread_t *scheduler_get_next_thread(void);
 
-/**
- * Find thread by TID
- *
- * @param tid Thread ID to find
- * @return Pointer to thread or NULL if not found
- */
-thread_t *thread_find(uint64_t tid);
+    // Thread synchronization
+    typedef struct
+    {
+        uint32_t value;
+        spinlock_t lock;
+    } semaphore_t;
 
-/**
- * Get current thread
- *
- * @return Pointer to current thread or NULL
- */
-thread_t *thread_get_current(void);
+    int semaphore_init(semaphore_t *sem, uint32_t initial_value);
+    int semaphore_wait(semaphore_t *sem);
+    int semaphore_signal(semaphore_t *sem);
+    void semaphore_destroy(semaphore_t *sem);
 
-/**
- * Set thread priority
- *
- * @param thread Thread to set priority for
- * @param priority New priority (-20 to +19)
- * @return 0 on success, negative error code on failure
- */
-int thread_set_priority(thread_t *thread, int priority);
+    // Thread-local storage
+    void *thread_get_tls(void);
+    int thread_set_tls(void *tls);
 
-/**
- * Put thread to sleep
- *
- * @param thread Thread to sleep
- * @param nanoseconds Sleep duration in nanoseconds
- * @return 0 on success, negative error code on failure
- */
-int thread_sleep(thread_t *thread, uint64_t nanoseconds);
-
-/**
- * Wake up a sleeping thread
- *
- * @param thread Thread to wake up
- * @return 0 on success, negative error code on failure
- */
-int thread_wakeup(thread_t *thread);
-
-/**
- * Get thread count
- *
- * @return Number of active threads
- */
-uint32_t thread_get_count(void);
-
-/**
- * Initialize thread management system
- */
-void thread_init(void);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ORION_THREAD_H
