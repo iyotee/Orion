@@ -1,5 +1,14 @@
 # Orion Kernel Build
-set(KERNEL_SOURCES
+
+# Add subdirectories
+add_subdirectory(hal)
+add_subdirectory(core)
+add_subdirectory(mm)
+add_subdirectory(net)
+add_subdirectory(arch)
+
+# Create kernel executable
+add_executable(kernel
     # Entry point and assembly files
     arch/${ORION_ARCH}/boot.S
     arch/${ORION_ARCH}/arch_asm.S
@@ -35,10 +44,6 @@ set(KERNEL_SOURCES
     mm/pmm.c
     mm/slab.c
     mm/vmm.c
-
-    # File system
-    fs/ramfs.c
-    fs/vfs.c
 )
 
 # Create kernel executable
@@ -59,4 +64,16 @@ target_include_directories(kernel PRIVATE
 # Link with custom linker script
 set_target_properties(kernel PROPERTIES
     LINK_FLAGS "${CMAKE_EXE_LINKER_FLAGS}"
+)
+
+# Link with kernel component libraries
+target_link_libraries(kernel
+    orion_hal
+    orion_core
+    orion_mm
+    orion_arch
+    pthread
+    m
+    rt
+    dl
 )
