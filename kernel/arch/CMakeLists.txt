@@ -20,11 +20,16 @@ if(ORION_ARCH STREQUAL "x86_64")
         x86_64/msvc_stubs.c
         x86_64/stubs.c
         x86_64/syscall_entry.S
+        x86_64/arch_advanced.c
+        x86_64/test_x86_64.c
     )
     set(ARCH_INCLUDES x86_64)
 elseif(ORION_ARCH STREQUAL "aarch64")
     set(ARCH_SOURCES
-        # aarch64/arch_aarch64.c  # Not yet implemented
+        aarch64/boot.S
+        aarch64/arch_asm.S
+        aarch64/arch.c
+        aarch64/test_aarch64.c
     )
     set(ARCH_INCLUDES aarch64)
 elseif(ORION_ARCH STREQUAL "riscv64")
@@ -32,6 +37,19 @@ elseif(ORION_ARCH STREQUAL "riscv64")
         # riscv64/arch_riscv64.c  # Not yet implemented
     )
     set(ARCH_INCLUDES riscv64)
+elseif(ORION_ARCH STREQUAL "loongarch")
+    set(ARCH_SOURCES
+        loongarch/boot.S
+        loongarch/arch_asm.S
+        loongarch/arch.c
+    )
+    set(ARCH_INCLUDES loongarch)
+elseif(ORION_ARCH STREQUAL "s390x")
+    set(ARCH_SOURCES
+        s390x/arch.c
+        s390x/test_s390x.c
+    )
+    set(ARCH_INCLUDES s390x)
 else()
     # Generic architecture for unsupported architectures
     set(ARCH_SOURCES

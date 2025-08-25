@@ -25,9 +25,29 @@ elseif(ORION_ARCH STREQUAL "aarch64")
     set(HAL_ARCH_INCLUDES aarch64)
 elseif(ORION_ARCH STREQUAL "riscv64")
     set(HAL_ARCH_SOURCES
-        # riscv64/hal_riscv64.c  # Not yet implemented
+        riscv64/hal_riscv64.c
     )
     set(HAL_ARCH_INCLUDES riscv64)
+elseif(ORION_ARCH STREQUAL "powerpc")
+    set(HAL_ARCH_SOURCES
+        powerpc/hal_powerpc.c
+    )
+    set(HAL_ARCH_INCLUDES powerpc)
+elseif(ORION_ARCH STREQUAL "s390x")
+    set(HAL_ARCH_SOURCES
+        s390x/hal_s390x.c
+    )
+    set(HAL_ARCH_INCLUDES s390x)
+elseif(ORION_ARCH STREQUAL "mips")
+    set(HAL_ARCH_SOURCES
+        mips/hal_mips.c
+    )
+    set(HAL_ARCH_INCLUDES mips)
+elseif(ORION_ARCH STREQUAL "armv7l")
+    set(HAL_ARCH_SOURCES
+        armv7l/hal_armv7l.c
+    )
+    set(HAL_ARCH_INCLUDES armv7l)
 else()
     # Generic HAL for unsupported architectures
     set(HAL_ARCH_SOURCES

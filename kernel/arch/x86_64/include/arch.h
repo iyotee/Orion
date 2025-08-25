@@ -16,6 +16,7 @@
 #define ORION_ARCH_X86_64_H
 
 #include <orion/types.h>
+#include "config.h"
 
 // x86_64 architecture-specific definitions
 
